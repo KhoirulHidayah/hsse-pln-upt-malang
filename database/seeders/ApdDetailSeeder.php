@@ -1,0 +1,148 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class ApdDetailSeeder extends Seeder
+{
+    public function run(): void
+    {
+        DB::table('apd_details')->insert([
+            // 🪖 HELM (Safety Helmet) — sesuai SPLN U2.006:2023 Lampiran Tabel Warna Helm
+            [
+                'apd_id'          => 1,
+                'nama_detail'     => 'Helm Safety Warna Putih (Manajemen, Engineer, dan Visitor)',
+                'kode_detail'     => 'APD-001-PTH',
+                'standar'         => 'SPLN U2.006:2023; SNI 1811:2007; ANSI/ISEA Z89.1-2014 Type I Class E; EN 397:2012',
+                'bahan'           => 'ABS (Acrylonitrile Butadiene Styrene)',
+                'warna'           => 'Putih (RAL 9010)',
+                'ukuran'          => 'Universal (Adjustable)',
+                'kemampuan'       => 'Tahan benturan vertikal dan arus listrik hingga 20.000 Volt.',
+                'masa_penggunaan' => '4 tahun',
+                'fungsi'          => 'Melindungi kepala dari benturan benda jatuh dan kontak listrik bagi personel manajemen, engineer, dan tamu.',
+                'keterangan'      => 'Dilengkapi suspensi 6 titik dan chin strap. Warna putih digunakan untuk manajemen, engineer, dan visitor.',
+                'gambar'          => 'apd/helm_putih.png',
+                'created_at'      => now(),
+                'updated_at'      => now(),
+            ],
+            [
+                'apd_id'          => 1,
+                'nama_detail'     => 'Helm Safety Warna Merah (Pengawas K3 dan Pekerjaan)',
+                'kode_detail'     => 'APD-001-MRH',
+                'standar'         => 'SPLN U2.006:2023; SNI 1811:2007; ANSI Z89.1-2014 Type I Class G',
+                'bahan'           => 'ABS (Acrylonitrile Butadiene Styrene)',
+                'warna'           => 'Merah (RAL 3000)',
+                'ukuran'          => 'Universal (Adjustable)',
+                'kemampuan'       => 'Tahan panas dan benturan berat pada area kerja industri.',
+                'masa_penggunaan' => '4 tahun',
+                'fungsi'          => 'Digunakan oleh pengawas K3, pengawas pekerjaan, dan pengawas manuver untuk identifikasi mudah di lapangan.',
+                'keterangan'      => 'Helm merah sebagai tanda tanggung jawab pengawasan dan keselamatan kerja.',
+                'gambar'          => 'apd/helm_merah.png',
+                'created_at'      => now(),
+                'updated_at'      => now(),
+            ],
+            [
+                'apd_id'          => 1,
+                'nama_detail'     => 'Helm Safety Warna Biru (Pelaksana Pekerjaan)',
+                'kode_detail'     => 'APD-001-BIR',
+                'standar'         => 'SPLN U2.006:2023; EN 397:2012; ANSI Z89.1-2014 Type I Class G',
+                'bahan'           => 'HDPE (High Density Polyethylene)',
+                'warna'           => 'Biru (RAL 5002)',
+                'ukuran'          => 'Universal (Adjustable)',
+                'kemampuan'       => 'Tahan benturan dan suhu kerja tinggi.',
+                'masa_penggunaan' => '4 tahun',
+                'fungsi'          => 'Digunakan oleh pelaksana pekerjaan di area proyek dan lapangan.',
+                'keterangan'      => 'Warna biru digunakan oleh personel pelaksana utama pekerjaan sesuai SPLN.',
+                'gambar'          => 'apd/helm_biru.png',
+                'created_at'      => now(),
+                'updated_at'      => now(),
+            ],
+            [
+                'apd_id'          => 1,
+                'nama_detail'     => 'Helm Safety Warna Kuning (Mitra Kerja dan Magang)',
+                'kode_detail'     => 'APD-001-KNG',
+                'standar'         => 'SPLN U2.006:2023; SNI 1811:2007; EN 397:2012+A1:2012',
+                'bahan'           => 'HDPE (High Density Polyethylene)',
+                'warna'           => 'Kuning (RAL 1026)',
+                'ukuran'          => 'Universal (Adjustable)',
+                'kemampuan'       => 'Melindungi kepala dari kejatuhan benda ringan dan panas sedang.',
+                'masa_penggunaan' => '4 tahun',
+                'fungsi'          => 'Dikenakan oleh mitra kerja (kontraktor) dan peserta magang sesuai pedoman SPLN.',
+                'keterangan'      => 'Warna kuning menandakan pekerja eksternal atau magang di lokasi kerja PLN.',
+                'gambar'          => 'apd/helm_kuning.png',
+                'created_at'      => now(),
+                'updated_at'      => now(),
+            ],
+
+            // 👢 SAFETY SHOES — masa penggunaan 2 tahun
+            [
+                'apd_id'          => 3,
+                'nama_detail'     => 'Sepatu Safety S3 SRC (Anti Slip & Anti Tusuk)',
+                'kode_detail'     => 'APD-003-S3',
+                'standar'         => 'SPLN U2.006:2023; SNI ISO 20345:2018; EN ISO 20345:2011 S3 SRC; ASTM F2413-18 EH',
+                'bahan'           => 'Kulit Full Grain + Sol PU/TPU',
+                'warna'           => 'Hitam',
+                'ukuran'          => '39–45',
+                'kemampuan'       => 'Tahan benturan 200 Joule, anti tusuk, anti slip, dan tahan minyak.',
+                'masa_penggunaan' => '2 tahun',
+                'fungsi'          => 'Melindungi kaki dari benda berat, tusukan, dan lantai licin di area kerja.',
+                'keterangan'      => 'Dilengkapi steel toe cap dan insole anti static (ESD protection).',
+                'gambar'          => 'apd/safety_shoes_s3.png',
+                'created_at'      => now(),
+                'updated_at'      => now(),
+            ],
+            [
+                'apd_id'          => 3,
+                'nama_detail'     => 'Sepatu Safety Dielectric (Tahan Listrik)',
+                'kode_detail'     => 'APD-003-DLC',
+                'standar'         => 'SPLN U2.006:2023; ASTM F2413-18 EH; EN 50321-1:2018; IEC 60903:2014',
+                'bahan'           => 'Karet isolasi (Rubber Insulating)',
+                'warna'           => 'Kuning',
+                'ukuran'          => '39–44',
+                'kemampuan'       => 'Tahan arus listrik hingga 18.000 Volt, anti slip, dan tahan minyak.',
+                'masa_penggunaan' => '2 tahun',
+                'fungsi'          => 'Untuk pekerjaan listrik bertegangan tinggi (live line).',
+                'keterangan'      => 'Tanpa logam, ringan, dan mudah dibersihkan.',
+                'gambar'          => 'apd/safety_shoes_dielectric.png',
+                'created_at'      => now(),
+                'updated_at'      => now(),
+            ],
+
+            // 🧍 FULL BODY HARNESS — masa penggunaan 10 tahun
+            [
+                'apd_id'          => 4,
+                'nama_detail'     => 'Full Body Harness 5 Titik (Pekerjaan di Ketinggian)',
+                'kode_detail'     => 'APD-004-5T',
+                'standar'         => 'SPLN U2.006:2023; SNI 8603:2018; ANSI Z359.11-2014; EN 361:2002; EN 358:2018',
+                'bahan'           => 'Polyester Webbing + D-Ring Alloy Steel',
+                'warna'           => 'Kuning & Hitam',
+                'ukuran'          => 'All Size (Adjustable)',
+                'kemampuan'       => 'Menahan beban hingga 140 kg; gaya jatuh maksimum 6 kN.',
+                'masa_penggunaan' => '10 tahun',
+                'fungsi'          => 'Menahan tubuh agar tidak jatuh saat bekerja di tower, tiang, atau gardu.',
+                'keterangan'      => 'Dilengkapi dorsal, sternal, dan side D-rings serta lanyard absorber.',
+                'gambar'          => 'apd/full_body_harness_5titik.png',
+                'created_at'      => now(),
+                'updated_at'      => now(),
+            ],
+            [
+                'apd_id'          => 4,
+                'nama_detail'     => 'Full Body Harness Double Lanyard Shock Absorber',
+                'kode_detail'     => 'APD-004-DLY',
+                'standar'         => 'SPLN U2.006:2023; EN 361:2002; EN 355:2002; ANSI Z359.13-2013',
+                'bahan'           => 'Polyamide Webbing + Hook Steel + Energy Absorber',
+                'warna'           => 'Kuning',
+                'ukuran'          => 'All Size (Adjustable)',
+                'kemampuan'       => 'Mengurangi gaya jatuh hingga <6 kN; panjang total 2 meter.',
+                'masa_penggunaan' => '10 tahun',
+                'fungsi'          => 'Menahan dan meredam energi jatuh bebas agar aman bagi pekerja.',
+                'keterangan'      => 'Lanyard dilengkapi shock absorber dan dua pengait karabiner galvanis.',
+                'gambar'          => 'apd/harness_double_lanyard.png',
+                'created_at'      => now(),
+                'updated_at'      => now(),
+            ],
+        ]);
+    }
+}
