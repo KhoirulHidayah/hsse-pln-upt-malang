@@ -40,7 +40,7 @@ export default function Index({ auth, jenisApds, filters }) {
 
     // 🔽 Komponen header sortable
     const SortableHeader = ({ field, label }) => (
-        <th onClick={() => sortChanged(field)} className="px-3 py-2 cursor-pointer">
+        <th onClick={() => sortChanged(field)} className="px-3 py-2 cursor-pointer whitespace-nowrap">
             <div className="flex items-center gap-1">
                 <span>{label}</span>
                 <div className="flex flex-col">
@@ -131,140 +131,132 @@ export default function Index({ auth, jenisApds, filters }) {
 
                             {/* 📋 TABEL DESKTOP */}
                             <div className="hidden md:block">
-                                <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                                    <thead className="text-xs uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 border-b-2 border-gray-500">
-                                        <tr>
-                                            <th className="px-3 py-2">No</th>
-                                            <SortableHeader field="nama_jenis" label="Nama Jenis APD" />
-                                            <th className="px-3 py-2">Deskripsi</th>
-                                            <SortableHeader field="jumlah_apd" label="Jumlah APD" />
-                                            <SortableHeader field="created_at" label="Tanggal Buat" />
-                                            <SortableHeader field="updated_at" label="Tanggal Update" />
-                                            <th className="px-3 py-2 text-right">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {jenisApds.data.length > 0 ? (
-                                            jenisApds.data.map((jenis, index) => (
-                                                <tr key={jenis.id} className="border-b">
-                                                    <td className="px-3 py-2">
-                                                        {(jenisApds.current_page - 1) * jenisApds.per_page + index + 1}
-                                                    </td>
-                                                    <th className="px-3 py-2 text-gray-800 dark:text-gray-100 hover:underline">
-                                                        <Link href={route("jenis-apd.show", jenis.id)}>
-                                                            {jenis.nama_jenis}
-                                                        </Link>
-                                                    </th>
-                                                    <td className="px-3 py-2">{jenis.deskripsi || "-"}</td>
+                                <div className="overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-lg">
+                                    <table className="min-w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                                        <thead className="text-xs uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 border-b-2 border-gray-500">
+                                            <tr>
+                                                <th className="px-3 py-2 whitespace-nowrap">No</th>
+                                                <SortableHeader field="nama_jenis" label="Nama Jenis APD" />
+                                                <th className="px-3 py-2 whitespace-nowrap">Deskripsi</th>
+                                                <SortableHeader field="apds_count" label="Jumlah APD" />
+                                                <th className="px-3 py-2 text-right whitespace-nowrap">Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {jenisApds.data.length > 0 ? (
+                                                jenisApds.data.map((jenis, index) => (
+                                                    <tr key={jenis.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                                        <td className="px-3 py-2 whitespace-nowrap">
+                                                            {(jenisApds.current_page - 1) * jenisApds.per_page + index + 1}
+                                                        </td>
+                                                        <th className="px-3 py-2 text-gray-800 dark:text-gray-100 min-w-[200px] max-w-[250px]">
+                                                            <Link href={route("jenis-apd.show", jenis.id)} className="hover:underline">
+                                                                {jenis.nama_jenis}
+                                                            </Link>
+                                                        </th>
+                                                        <td className="px-3 py-2 max-w-sm">{jenis.deskripsi || "-"}</td>
 
-                                                    {/* Jumlah APD */}
-                                                    <td className="px-3 py-2 text-center">
-                                                        <Link
-                                                            href={route("apd.index", { jenis_id: jenis.id })}
-                                                            className={`inline-block px-2 py-1 rounded-full text-xs font-semibold transition duration-150 hover:scale-105 ${
-                                                                jenis.apds_count === 0
-                                                                    ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300 hover:bg-red-200"
-                                                                    : jenis.apds_count < 5
-                                                                    ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300 hover:bg-yellow-200"
-                                                                    : "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 hover:bg-green-200"
-                                                            }`}
-                                                        >
-                                                            {jenis.apds_count ?? 0}
-                                                        </Link>
-                                                    </td>
-                                                    <td className="px-3 py-2">
-                                                        {jenis.created_at
-                                                            ? new Date(jenis.created_at).toISOString().split("T")[0]
-                                                            : "-"}
-                                                    </td>
-                                                    <td className="px-3 py-2">
-                                                        {jenis.updated_at
-                                                            ? new Date(jenis.updated_at).toISOString().split("T")[0]
-                                                            : "-"}
-                                                    </td>
-                                                    <td className="px-3 py-2 text-right">
-                                                        <Link
-                                                            href={route("jenis-apd.edit", jenis.id)}
-                                                            className="font-medium text-blue-600 dark:text-blue-500 hover:underline mx-1"
-                                                        >
-                                                            Edit
-                                                        </Link>
-                                                        <button
-                                                            onClick={() => deleteJenisApd(jenis)}
-                                                            className="font-medium text-red-600 dark:text-red-500 hover:underline mx-1"
-                                                        >
-                                                            Hapus
-                                                        </button>
+                                                        {/* Jumlah APD */}
+                                                        <td className="px-3 py-2 text-center whitespace-nowrap">
+                                                            <Link
+                                                                href={route("apd.index", { jenis_id: jenis.id })}
+                                                                className={`inline-block px-3 py-1.5 rounded-full text-xs font-semibold transition duration-150 hover:scale-105 ${
+                                                                    jenis.apds_count === 0
+                                                                        ? "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300 hover:bg-red-200/80"
+                                                                        : jenis.apds_count < 5
+                                                                        ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300 hover:bg-yellow-200/80"
+                                                                        : "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300 hover:bg-green-200/80"
+                                                                }`}
+                                                            >
+                                                                {jenis.apds_count ?? 0}
+                                                            </Link>
+                                                        </td>
+
+                                                        {/* AKSI - DIBUAT VERTIKAL DAN RINGKAS */}
+                                                        <td className="px-3 py-2 text-right whitespace-nowrap">
+                                                            <div className="flex flex-col items-end gap-1">
+                                                                <Link
+                                                                    href={route("jenis-apd.edit", jenis.id)}
+                                                                    className="text-xs text-blue-600 dark:text-blue-500 hover:underline"
+                                                                >
+                                                                    Edit
+                                                                </Link>
+                                                                <button
+                                                                    onClick={() => deleteJenisApd(jenis)}
+                                                                    className="text-xs text-red-600 dark:text-red-500 hover:underline"
+                                                                >
+                                                                    Hapus
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan="7" className="px-3 py-4 text-center text-gray-400">
+                                                        Tidak ada data ditemukan.
                                                     </td>
                                                 </tr>
-                                            ))
-                                        ) : (
-                                            <tr>
-                                                <td colSpan="7" className="px-3 py-4 text-center text-gray-400">
-                                                    Tidak ada data ditemukan.
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
 
                             {/* 📱 TABEL MOBILE */}
                             <div className="md:hidden">
-                                <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                                    <thead className="text-xs uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 border-b-2 border-gray-500">
-                                        <tr>
-                                            <th className="px-2 py-2">No</th>
-                                            <th className="px-2 py-2">Jenis APD</th>
-                                            <th className="px-2 py-2 text-right">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {jenisApds.data.length > 0 ? (
-                                            jenisApds.data.map((jenis, index) => (
-                                                <tr key={jenis.id} className="border-b">
-                                                    <td className="px-2 py-3">
-                                                        {(jenisApds.current_page - 1) * jenisApds.per_page + index + 1}
-                                                    </td>
-                                                    <td className="px-2 py-3">
+                                {jenisApds.data.length > 0 ? (
+                                    jenisApds.data.map((jenis, index) => (
+                                        <div key={jenis.id} className="border-b py-3 flex justify-between items-start">
+                                            {/* Data Kiri */}
+                                            <div className="flex-1 min-w-0 pr-4">
+                                                <div className="text-xs text-gray-400 dark:text-gray-500 mb-1">
+                                                     No. {(jenisApds.current_page - 1) * jenisApds.per_page + index + 1}
+                                                </div>
+                                                <Link
+                                                    href={route("jenis-apd.show", jenis.id)}
+                                                    className="font-semibold text-gray-800 dark:text-gray-100 hover:underline block mb-1 truncate"
+                                                >
+                                                    {jenis.nama_jenis}
+                                                </Link>
+                                                <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1 mt-1">
+                                                    <p className="line-clamp-2">{jenis.deskripsi || "Tidak ada deskripsi."}</p>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="font-medium text-gray-700 dark:text-gray-300">Jumlah APD:</span>
                                                         <Link
-                                                            href={route("jenis-apd.show", jenis.id)}
-                                                            className="font-semibold text-gray-800 dark:text-gray-100 hover:underline block mb-1"
+                                                            href={route("apd.index", { jenis_id: jenis.id })}
+                                                            className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${
+                                                                jenis.apds_count === 0
+                                                                    ? "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300"
+                                                                    : "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300"
+                                                            }`}
                                                         >
-                                                            {jenis.nama_jenis}
+                                                            {jenis.apds_count ?? 0}
                                                         </Link>
-                                                        <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
-                                                            <div>{jenis.deskripsi || "-"}</div>
-                                                            <div>Jumlah APD: {jenis.apds_count ?? 0}</div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-2 py-3 text-right">
-                                                        <div className="flex flex-col gap-1">
-                                                            <Link
-                                                                href={route("jenis-apd.edit", jenis.id)}
-                                                                className="text-xs font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                                                            >
-                                                                Edit
-                                                            </Link>
-                                                            <button
-                                                                onClick={() => deleteJenisApd(jenis)}
-                                                                className="text-xs font-medium text-red-600 dark:text-red-500 hover:underline"
-                                                            >
-                                                                Hapus
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        ) : (
-                                            <tr>
-                                                <td colSpan="3" className="px-2 py-4 text-center text-gray-400">
-                                                    Tidak ada data ditemukan.
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Aksi Kanan (Vertikal) */}
+                                            <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                                                <Link
+                                                    href={route("jenis-apd.edit", jenis.id)}
+                                                    className="text-xs font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                                                >
+                                                    Edit
+                                                </Link>
+                                                <button
+                                                    onClick={() => deleteJenisApd(jenis)}
+                                                    className="text-xs font-medium text-red-600 dark:text-red-500 hover:underline"
+                                                >
+                                                    Hapus
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="text-center text-gray-400 py-4">Tidak ada data ditemukan.</p>
+                                )}
                             </div>
 
                             <Pagination links={jenisApds.links} />

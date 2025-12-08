@@ -195,7 +195,7 @@ export default function Index({ auth, notifications, statistics, filters }) {
                         </div>
 
                         {/* Search Bar */}
-                        <div className="px-6 py-4 ">
+                        <div className="px-6 py-4">
                             <div className="relative">
                                 <input
                                     type="text"
@@ -236,10 +236,10 @@ export default function Index({ auth, notifications, statistics, filters }) {
                                                 <div className="flex gap-4">
                                                     {/* Icon */}
                                                     <div className={`flex-shrink-0 w-14 h-14 rounded-lg ${getIconColorClass(notif.badge_color)} flex items-center justify-center`}>
-                                                        {notif.apd_detail_gambar ? (
+                                                        {notif.apd_gambar ? (
                                                             <img 
-                                                                src={notif.apd_detail_gambar} 
-                                                                alt={notif.apd_detail_nama}
+                                                                src={notif.apd_gambar} 
+                                                                alt={notif.apd_nama}
                                                                 className="w-10 h-10 object-cover rounded"
                                                             />
                                                         ) : (
@@ -260,7 +260,7 @@ export default function Index({ auth, notifications, statistics, filters }) {
                                                                     {notif.apd_nama}
                                                                 </h4>
                                                                 <p className="text-sm text-gray-600 mt-0.5">
-                                                                    {notif.apd_detail_nama}
+                                                                    Kode: {notif.apd_kode}
                                                                 </p>
                                                             </div>
                                                             <span className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold ${getBadgeClass(notif.badge_color)}`}>
@@ -275,7 +275,7 @@ export default function Index({ auth, notifications, statistics, filters }) {
                                                                 : notif.status_notifikasi === 'Expired'
                                                                 ? `Masa pakai APD tersisa ${notif.hari_tersisa} hari. Monitor kondisi secara berkala.`
                                                                 : notif.status_notifikasi === 'Warning'
-                                                                ? `Masa pakai APD masih dalam masa pakai yang aman. Tidak perlu tindakan saat ini.`
+                                                                ? `Masa pakai APD akan habis dalam ${notif.hari_tersisa} hari. Persiapkan pergantian.`
                                                                 : `Kondisi APD masih dalam masa pakai yang aman. Tidak perlu tindakan saat ini.`
                                                             }
                                                         </p>

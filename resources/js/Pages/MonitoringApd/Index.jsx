@@ -11,16 +11,9 @@ import { ClipboardCheck, FileUp, AlertTriangle, CheckCircle, XCircle, RefreshCw 
 const ErrorDetailsCard = ({ errors }) => {
     if (!errors || errors.length === 0) return null;
 
-    // Kelompokkan error berdasarkan jenis
-    const errorsByType = {};
-    errors.forEach(error => {
-        error.errors.forEach(errMsg => {
-            if (!errorsByType[errMsg]) {
-                errorsByType[errMsg] = [];
-            }
-            errorsByType[errMsg].push(error);
-        });
-    });
+    // Sort errors by row number for better readability
+    // Mengurutkan berdasarkan baris
+    const sortedErrors = errors.sort((a, b) => (a.row || 0) - (b.row || 0));
 
     return (
         <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-lg p-6 mb-6">
@@ -28,46 +21,36 @@ const ErrorDetailsCard = ({ errors }) => {
                 <XCircle className="w-6 h-6 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
                     <h3 className="text-lg font-semibold text-red-800 dark:text-red-300 mb-1">
-                        Detail Baris Yang Gagal Diimport ({errors.length} baris)
+                        ⚠️ Ditemukan Kesalahan Validasi Pada Data Import ({errors.length} baris/atribut)
                     </h3>
                     <p className="text-sm text-red-600 dark:text-red-400">
-                        Berikut adalah detail error untuk setiap baris yang gagal. Perbaiki data sesuai petunjuk di bawah.
+                        Berikut adalah detail error, perhatikan **Nomor Baris** dan **Atribut** yang tidak valid.
                     </p>
-                </div>
-            </div>
-
-            {/* Summary Error by Type */}
-            <div className="mb-4 p-4 bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-800">
-                <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100 mb-3">
-                    📊 Ringkasan Error Berdasarkan Jenis:
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {Object.entries(errorsByType).map(([errorType, errorList]) => (
-                        <div key={errorType} className="flex items-center justify-between p-2 bg-red-50 dark:bg-red-900/30 rounded">
-                            <span className="text-xs text-gray-700 dark:text-gray-300">{errorType}</span>
-                            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-600 text-white text-xs font-bold">
-                                {errorList.length}
-                            </span>
-                        </div>
-                    ))}
                 </div>
             </div>
 
             {/* Detailed Error List */}
             <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
-                {errors.map((error, index) => (
-                    <div 
-                        key={index} 
+                {sortedErrors.map((error, index) => (
+                    <div
+                        key={index}
                         className="bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-800 p-4 hover:shadow-md transition-shadow"
                     >
-                        {/* Header dengan nomor baris */}
+                        {/* Header dengan nomor baris dan atribut */}
                         <div className="flex items-center gap-3 mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
                             <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-red-600 text-white text-sm font-bold flex-shrink-0">
-                                {error.row}
+                                {/* Menampilkan Nomor Baris */}
+                                {error.row || '-'}
                             </span>
                             <div className="flex-1">
                                 <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                    Baris ke-{error.row}
+                                    Baris ke-{error.row || '-'}
+                                    {/* Menampilkan Atribut yang tidak valid */}
+                                    {error.attribute && (
+                                        <span className="ml-3 px-2 py-0.5 text-xs font-semibold tracking-wider uppercase bg-red-100 text-red-600 dark:bg-red-800 dark:text-red-200 rounded-full">
+                                            Atribut: {error.attribute}
+                                        </span>
+                                    )}
                                 </p>
                                 <p className="text-xs text-gray-500 dark:text-gray-400">
                                     {error.errors.length} error ditemukan
@@ -96,13 +79,8 @@ const ErrorDetailsCard = ({ errors }) => {
                                 <div>
                                     <span className="text-gray-500 dark:text-gray-400">Nama APD:</span>
                                     <p className="text-gray-900 dark:text-gray-100 font-medium">
+                                        {/* Menggunakan 'nama_apd' sesuai struktur import */}
                                         {error.data.nama_apd || '-'}
-                                    </p>
-                                </div>
-                                <div>
-                                    <span className="text-gray-500 dark:text-gray-400">Detail APD:</span>
-                                    <p className="text-gray-900 dark:text-gray-100 font-medium">
-                                        {error.data.detail_apd || '-'}
                                     </p>
                                 </div>
                                 <div>
@@ -128,10 +106,10 @@ const ErrorDetailsCard = ({ errors }) => {
                             <ul className="text-xs text-blue-700 dark:text-blue-400 space-y-1 list-disc list-inside">
                                 {error.errors.map((errMsg, idx) => (
                                     <li key={idx}>
-                                        {errMsg.includes('tidak ditemukan') && 
+                                        {errMsg.includes('tidak ditemukan') &&
                                             'Pastikan nama yang diinput sama persis dengan data di sheet referensi (gunakan copy-paste)'
                                         }
-                                        {errMsg.includes('tidak valid') && 
+                                        {errMsg.includes('tidak valid') &&
                                             'Periksa format data (tanggal harus YYYY-MM-DD, stok harus angka)'
                                         }
                                         {!errMsg.includes('tidak ditemukan') && !errMsg.includes('tidak valid') &&
@@ -151,10 +129,10 @@ const ErrorDetailsCard = ({ errors }) => {
                     ⚠️ Tips untuk menghindari error:
                 </p>
                 <ul className="text-xs text-yellow-700 dark:text-yellow-400 space-y-1 list-disc list-inside">
-                    <li>Gunakan copy-paste dari sheet referensi untuk Nama APD, Detail APD, Lokasi, dan Gardu Induk</li>
+                    <li>Gunakan copy-paste dari sheet referensi untuk **Nama APD**, Lokasi, dan Gardu Induk</li>
                     <li>Pastikan format tanggal adalah YYYY-MM-DD (contoh: 2025-01-15)</li>
                     <li>Pastikan tidak ada spasi berlebih di awal atau akhir data</li>
-                    <li>Periksa sheet "Ref - APD", "Ref - Detail APD", "Ref - Lokasi", dan "Ref - Gardu Induk" untuk melihat daftar data yang tersedia</li>
+                    <li>Periksa sheet **"Ref - APD"**, "Ref - Lokasi", dan "Ref - Gardu Induk" untuk melihat daftar data yang tersedia</li>
                 </ul>
             </div>
         </div>
@@ -166,8 +144,9 @@ const ImportSummaryCard = ({ results }) => {
     if (!results) return null;
 
     const { imported, updated, skipped, total_processed } = results;
-    const successRate = total_processed > 0 
-        ? Math.round(((imported + updated) / total_processed) * 100) 
+    // total_processed kini hanya menghitung (imported + updated + skipped validasi)
+    const successRate = (imported + updated) > 0 
+        ? Math.round(((imported + updated) / (imported + updated + skipped)) * 100) 
         : 0;
 
     return (
@@ -219,7 +198,7 @@ const ImportSummaryCard = ({ results }) => {
                     </p>
                 </div>
 
-                {/* Data Gagal */}
+                {/* Data Gagal Validasi */}
                 <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 rounded-lg p-4 border border-red-200 dark:border-red-800">
                     <div className="flex items-center justify-between mb-2">
                         <XCircle className="w-8 h-8 text-red-600 dark:text-red-400" />
@@ -228,10 +207,10 @@ const ImportSummaryCard = ({ results }) => {
                         </span>
                     </div>
                     <p className="text-sm font-medium text-red-800 dark:text-red-300">
-                        Data Gagal
+                        Data Gagal Validasi
                     </p>
                     <p className="text-xs text-red-600 dark:text-red-400 mt-1">
-                        Baris dengan error atau tidak valid
+                        Baris gagal karena atribut tidak sesuai
                     </p>
                 </div>
             </div>
@@ -285,7 +264,7 @@ const ImportExcelModal = ({ onClose, onImportSubmit, templateLink }) => {
 
                     <div className="flex justify-between items-center mt-6">
                          <a
-                            href={templateLink}
+                            href={route("monitoring-apd.template")}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-500 underline text-sm hover:text-blue-600 transition"
@@ -312,10 +291,11 @@ export default function Index({ auth, monitorings, lokasiList, garduList, filter
     const [lokasiFilter, setLokasiFilter] = useState(filters.lokasi_id || "");
     const [garduFilter, setGarduFilter] = useState(filters.gardu_induk_id || "");
     const [kondisiFilter, setKondisiFilter] = useState(filters.kondisi || "");
+    const [statusNotifikasiFilter, setStatusNotifikasiFilter] = useState(filters.status_notifikasi || "");
     const [showImportModal, setShowImportModal] = useState(false);
     const { flash } = usePage().props;
 
-    // ⚠️ Perubahan disini: Ambil import_results dari flash
+    // Ambil import_results dari flash
     const importResults = flash.import_results || null;
     const showErrorDetails = flash.show_error_details || false;
 
@@ -328,6 +308,7 @@ export default function Index({ auth, monitorings, lokasiList, garduList, filter
                 lokasi_id: lokasiFilter,
                 gardu_induk_id: garduFilter,
                 kondisi: kondisiFilter,
+                status_notifikasi: statusNotifikasiFilter,
                 sortField: field,
                 sortDirection:
                     filters.sortField === field && filters.sortDirection === "asc"
@@ -348,6 +329,7 @@ export default function Index({ auth, monitorings, lokasiList, garduList, filter
                     lokasi_id: lokasiFilter,
                     gardu_induk_id: garduFilter,
                     kondisi: kondisiFilter,
+                    status_notifikasi: statusNotifikasiFilter,
                     sortField: filters.sortField,
                     sortDirection: filters.sortDirection,
                 },
@@ -355,7 +337,7 @@ export default function Index({ auth, monitorings, lokasiList, garduList, filter
             );
         }, 300);
         return () => clearTimeout(delayDebounce);
-    }, [search, lokasiFilter, garduFilter, kondisiFilter]);
+    }, [search, lokasiFilter, garduFilter, kondisiFilter, statusNotifikasiFilter]);
 
     const SortableHeader = ({ field, label }) => (
         <th onClick={() => sortChanged(field)} className="px-3 py-2 cursor-pointer whitespace-nowrap">
@@ -383,7 +365,7 @@ export default function Index({ auth, monitorings, lokasiList, garduList, filter
 
     // 🗑️ Hapus data Monitoring
     const deleteMonitoring = (item) => {
-        if (!window.confirm(`Apakah kamu yakin ingin menghapus data Monitoring untuk "${item.apd_detail_nama}"?`))
+        if (!window.confirm(`Apakah kamu yakin ingin menghapus data Monitoring untuk "${item.apd_nama}"?`))
             return;
         router.delete(route("monitoring-apd.destroy", item.monitoring_id), { preserveScroll: true });
     };
@@ -457,23 +439,37 @@ export default function Index({ auth, monitorings, lokasiList, garduList, filter
                         />
                     )}
 
-                    {/* ✅ RINGKASAN HASIL IMPORT */}
-                    {importResults && <ImportSummaryCard results={importResults} />}
-
-                    {/* ⚠️ DETAIL ERROR JIKA ADA */}
-                    {showErrorDetails && importResults?.errors && (
-                        <ErrorDetailsCard errors={importResults.errors} />
+                    {/* Tampilkan pesan sukses/peringatan jika ada hasil import, MENGGANTIKAN flash.success biasa */}
+                    {importResults && (
+                        // Jika ada error (skipped > 0), tampilkan Peringatan Merah
+                        importResults.skipped > 0 ? (
+                            <div className="bg-red-500 py-3 px-4 text-white rounded-lg mb-4 flex items-start gap-2 shadow-lg">
+                                <XCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                                <span className="flex-1">
+                                    Import selesai dengan **{importResults.imported + importResults.updated} data berhasil** dan **{importResults.skipped} data gagal validasi**. 
+                                    Periksa detail error di bawah untuk memperbaikinya!
+                                </span>
+                            </div>
+                        ) : (
+                            // Jika tidak ada error (skipped = 0), tampilkan Sukses Hijau
+                            <div className="bg-emerald-500 py-3 px-4 text-white rounded-lg mb-4 flex items-start gap-2 shadow-lg">
+                                <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                                <span className="flex-1">
+                                    Import **berhasil**! Total {importResults.imported} data baru ditambahkan dan {importResults.updated} data diperbarui.
+                                </span>
+                            </div>
+                        )
                     )}
 
-                    {/* Alert Messages - Simple alerts for quick feedback */}
-                    {flash.success && !importResults && (
+                    {/* Tampilkan flash.success / flash.error biasa JIKA TIDAK ADA importResults yang ditampilkan di atas */}
+                    {!importResults && flash.success && (
                         <div className="bg-emerald-500 py-3 px-4 text-white rounded-lg mb-4 flex items-start gap-2 shadow-lg">
                             <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
                             <span className="flex-1">{flash.success}</span>
                         </div>
                     )}
 
-                    {flash.error && !showErrorDetails && (
+                    {!importResults && flash.error && !showErrorDetails && (
                         <div className="bg-red-500 py-3 px-4 text-white rounded-lg mb-4 flex items-start gap-2 shadow-lg">
                             <XCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
                             <span className="flex-1">{flash.error}</span>
@@ -483,10 +479,10 @@ export default function Index({ auth, monitorings, lokasiList, garduList, filter
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
                         <div className="p-6 text-gray-900 dark:text-gray-100">
                             {/* 🔎 Filter */}
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-4">
                                 <TextInput
-                                    className="w-full"
-                                    placeholder="Cari nama APD..."
+                                    className="w-full xl:col-span-2" // Ambil 2 kolom di layar lebar
+                                    placeholder="Cari nama APD atau catatan..."
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                 />
@@ -521,6 +517,17 @@ export default function Index({ auth, monitorings, lokasiList, garduList, filter
                                         { value: "Rusak", label: "Rusak" },
                                     ]}
                                 />
+                                <Select
+                                    className="w-full"
+                                    value={statusNotifikasiFilter}
+                                    onChange={(e) => setStatusNotifikasiFilter(e.target.value)}
+                                    placeholder="Semua Status Masa Berlaku"
+                                    options={[
+                                        { value: "Active", label: "Active" },
+                                        { value: "Warning", label: "Warning" },
+                                        { value: "Expired", label: "Expired" },
+                                    ]}
+                                />
                             </div>
 
                             {/* 📋 TABEL DESKTOP - Dengan wrapper scroll horizontal */}
@@ -531,15 +538,15 @@ export default function Index({ auth, monitorings, lokasiList, garduList, filter
                                             <tr>
                                                 <th className="px-3 py-2 whitespace-nowrap sticky left-0 bg-gray-50 dark:bg-gray-700 z-10">No</th>
                                                 <th className="px-3 py-2 whitespace-nowrap">Gambar</th>
-                                                <SortableHeader field="apd_detail_nama" label="Nama APD Detail" />
+                                                <SortableHeader field="apd_id" label="Nama APD" /> 
                                                 <th className="px-3 py-2 whitespace-nowrap">Lokasi</th>
                                                 <th className="px-3 py-2 whitespace-nowrap">Gardu Induk</th>
-                                                <th className="px-3 py-2 whitespace-nowrap">Stok</th>
-                                                <th className="px-3 py-2 whitespace-nowrap">Tanggal Distribusi</th>
-                                                <th className="px-3 py-2 whitespace-nowrap">Tanggal Pemeriksaan</th>
-                                                <th className="px-3 py-2 whitespace-nowrap">Tanggal Berakhir</th>
-                                                <th className="px-3 py-2 whitespace-nowrap">Kondisi</th>
-                                                <th className="px-3 py-2 whitespace-nowrap">Status</th>
+                                                <SortableHeader field="stok" label="Stok" />
+                                                <SortableHeader field="tanggal_distribusi" label="Tgl Distribusi" />
+                                                <SortableHeader field="tanggal_pemeriksaan" label="Tgl Pemeriksaan" />
+                                                <SortableHeader field="tanggal_berakhir" label="Tgl Berakhir" />
+                                                <SortableHeader field="kondisi" label="Kondisi" />
+                                                <SortableHeader field="status_notifikasi_otomatis" label="Status Masa Berlaku" />
                                                 <th className="px-3 py-2 text-right whitespace-nowrap sticky right-0 bg-gray-50 dark:bg-gray-700 z-10">Aksi</th>
                                             </tr>
                                         </thead>
@@ -554,10 +561,10 @@ export default function Index({ auth, monitorings, lokasiList, garduList, filter
                                                         </td>
                                                         <td className="px-3 py-2">
                                                             <div className="w-16 h-16 overflow-hidden rounded-md border flex items-center justify-center bg-gray-50 dark:bg-gray-800">
-                                                                {item.apd_detail_gambar ? (
+                                                                {item.apd_gambar ? (
                                                                     <img
-                                                                        src={item.apd_detail_gambar}
-                                                                        alt={item.apd_detail_nama}
+                                                                        src={item.apd_gambar}
+                                                                        alt={item.apd_nama}
                                                                         className="object-contain w-full h-full"
                                                                     />
                                                                 ) : (
@@ -570,8 +577,12 @@ export default function Index({ auth, monitorings, lokasiList, garduList, filter
                                                                 href={route("monitoring-apd.show", item.monitoring_id)}
                                                                 className="hover:underline line-clamp-2"
                                                             >
-                                                                {item.apd_detail_nama}
+                                                                {item.apd_nama}
                                                             </Link>
+                                                            {/* Tampilkan kode APD di bawah nama */}
+                                                            <p className="text-xs text-gray-500 dark:text-gray-400 font-normal">
+                                                                ({item.apd_kode || 'N/A'})
+                                                            </p>
                                                         </td>
                                                         <td className="px-3 py-2 whitespace-nowrap">{item.lokasi_nama || "-"}</td>
                                                         <td className="px-3 py-2 whitespace-nowrap">{item.gardu_nama || "-"}</td>
@@ -634,17 +645,18 @@ export default function Index({ auth, monitorings, lokasiList, garduList, filter
                                                                 {item.status_notifikasi_otomatis}
                                                             </span>
                                                         </td>
+                                                        {/* AKSI */}
                                                         <td className="px-3 py-2 text-right whitespace-nowrap sticky right-0 bg-white dark:bg-gray-800">
-                                                            <div className="flex items-center justify-end gap-2">
+                                                            <div className="flex flex-col items-end gap-1">
                                                                 <Link
                                                                     href={route("monitoring-apd.edit", item.monitoring_id)}
-                                                                    className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                                                                    className="text-xs text-blue-600 dark:text-blue-500 hover:underline"
                                                                 >
                                                                     Edit
                                                                 </Link>
                                                                 <button
                                                                     onClick={() => deleteMonitoring(item)}
-                                                                    className="font-medium text-red-600 dark:text-red-500 hover:underline"
+                                                                    className="text-xs text-red-600 dark:text-red-500 hover:underline"
                                                                 >
                                                                     Hapus
                                                                 </button>
@@ -672,24 +684,46 @@ export default function Index({ auth, monitorings, lokasiList, garduList, filter
                                             <div className="flex justify-between items-start">
                                                 <div>
                                                     <h3 className="font-semibold text-gray-800 dark:text-gray-100">
-                                                        {item.apd_detail_nama}
+                                                        {item.apd_nama}
                                                     </h3>
+                                                    <p className="text-xs text-gray-500">
+                                                        ({item.apd_kode || 'N/A'})
+                                                    </p>
                                                     <p className="text-xs text-gray-500">
                                                         {item.lokasi_nama || "-"} • {item.gardu_nama || "-"}
                                                     </p>
                                                 </div>
-                                                <span
-                                                    className={`px-2 py-1 rounded text-xs font-medium ${
-                                                        item.status_notifikasi_otomatis === "Active"
-                                                            ? "bg-green-100 text-green-700"
-                                                            : item.status_notifikasi_otomatis === "Warning"
-                                                            ? "bg-yellow-100 text-yellow-700"
-                                                            : "bg-red-100 text-red-700"
-                                                    }`}
-                                                >
-                                                    {item.status_notifikasi_otomatis}
-                                                </span>
+
+                                                {/* Mengubah Aksi Mobile menjadi vertikal dan ringkas */}
+                                                <div className="flex flex-col items-end gap-1"> 
+                                                    <span
+                                                        className={`px-2 py-1 rounded text-xs font-medium ${
+                                                            item.status_notifikasi_otomatis === "Active"
+                                                                ? "bg-green-100 text-green-700"
+                                                                : item.status_notifikasi_otomatis === "Warning"
+                                                                ? "bg-yellow-100 text-yellow-700"
+                                                                : "bg-red-100 text-red-700"
+                                                        }`}
+                                                    >
+                                                        {item.status_notifikasi_otomatis}
+                                                    </span>
+                                                    <div className="flex gap-2 text-xs mt-1">
+                                                        <Link
+                                                            href={route("monitoring-apd.edit", item.monitoring_id)}
+                                                            className="text-blue-600 dark:text-blue-400 hover:underline"
+                                                        >
+                                                            Edit
+                                                        </Link>
+                                                        <button
+                                                            onClick={() => deleteMonitoring(item)}
+                                                            className="text-red-600 dark:text-red-400 hover:underline"
+                                                        >
+                                                            Hapus
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
+
                                             <div className="mt-2 text-xs text-gray-500 flex items-center gap-3 flex-wrap">
                                                 <div className="flex items-center gap-1.5">
                                                     <span className="font-medium text-gray-700 dark:text-gray-300">Stok:</span>
@@ -713,26 +747,14 @@ export default function Index({ auth, monitorings, lokasiList, garduList, filter
                                                                 ? "bg-green-100 text-green-700"
                                                                 : item.kondisi === "Perlu Diganti"
                                                                 ? "bg-yellow-100 text-yellow-700"
-                                                                : "bg-red-100 text-red-700"
+                                                                : item.kondisi === "Rusak"
+                                                                ? "bg-red-100 text-red-700"
+                                                                : "bg-gray-100 text-gray-700"
                                                         }`}
                                                     >
                                                         {item.kondisi || "-"}
                                                     </span>
                                                 </div>
-                                            </div>
-                                            <div className="mt-2 flex gap-3 text-xs">
-                                                <Link
-                                                    href={route("monitoring-apd.edit", item.monitoring_id)}
-                                                    className="text-blue-600 dark:text-blue-400 hover:underline"
-                                                >
-                                                    Edit
-                                                </Link>
-                                                <button
-                                                    onClick={() => deleteMonitoring(item)}
-                                                    className="text-red-600 dark:text-red-400 hover:underline"
-                                                >
-                                                    Hapus
-                                                </button>
                                             </div>
                                         </div>
                                     ))

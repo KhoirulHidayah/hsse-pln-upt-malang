@@ -5,7 +5,7 @@ import Select from "@/Components/Select";
 import { Head, Link, router, usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/16/solid";
-import { MapPinned } from "lucide-react"; 
+import { MapPinned } from "lucide-react";
 
 export default function Index({ auth, garduInduks, lokasis, filters }) {
     const [search, setSearch] = useState(filters.search || "");
@@ -43,7 +43,7 @@ export default function Index({ auth, garduInduks, lokasis, filters }) {
 
     // 🔽 Header kolom sortable
     const SortableHeader = ({ field, label }) => (
-        <th onClick={() => sortChanged(field)} className="px-3 py-2 cursor-pointer">
+        <th onClick={() => sortChanged(field)} className="px-3 py-2 cursor-pointer whitespace-nowrap">
             <div className="flex items-center gap-1">
                 <span>{label}</span>
                 <div className="flex flex-col">
@@ -137,114 +137,110 @@ export default function Index({ auth, garduInduks, lokasis, filters }) {
 
                             {/* 📋 TABEL DESKTOP */}
                             <div className="hidden md:block">
-                                <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                                    <thead className="text-xs uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 border-b-2 border-gray-500">
-                                        <tr>
-                                            <th className="px-3 py-2">No</th>
-                                            <SortableHeader field="nama_gardu_induk" label="Nama Gardu Induk" />
-                                            <th className="px-3 py-2">Lokasi</th>
-                                            <SortableHeader field="created_at" label="Tanggal Buat" />
-                                            <SortableHeader field="updated_at" label="Tanggal Update" />
-                                            <th className="px-3 py-2 text-right">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {garduInduks.data.length > 0 ? (
-                                            garduInduks.data.map((gardu, index) => (
-                                                <tr key={gardu.gardu_induk_id} className="border-b">
-                                                    <td className="px-3 py-2">
-                                                        {(garduInduks.current_page - 1) * garduInduks.per_page + index + 1}
-                                                    </td>
-                                                    <th className="px-3 py-2 text-gray-800 dark:text-gray-100 hover:underline">
-                                                        <Link href={route("gardu-induk.show", gardu.gardu_induk_id)}>
-                                                            {gardu.nama_gardu_induk}
-                                                        </Link>
-                                                    </th>
-                                                    <td className="px-3 py-2">{gardu.lokasi_nama || "-"}</td>
-                                                    <td className="px-3 py-2">{gardu.created_at}</td>
-                                                    <td className="px-3 py-2">{gardu.updated_at}</td>
-                                                    <td className="px-3 py-2 text-right">
-                                                        <Link
-                                                            href={route("gardu-induk.edit", gardu.gardu_induk_id)}
-                                                            className="font-medium text-blue-600 dark:text-blue-500 hover:underline mx-1"
-                                                        >
-                                                            Edit
-                                                        </Link>
-                                                        <button
-                                                            onClick={() => deleteGarduInduk(gardu)}
-                                                            className="font-medium text-red-600 dark:text-red-500 hover:underline mx-1"
-                                                        >
-                                                            Hapus
-                                                        </button>
+                                <div className="overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-lg">
+                                    <table className="min-w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                                        <thead className="text-xs uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 border-b-2 border-gray-500">
+                                            <tr>
+                                                <th className="px-3 py-2 whitespace-nowrap">No</th>
+                                                <SortableHeader field="nama_gardu_induk" label="Nama Gardu Induk" />
+                                                <th className="px-3 py-2 whitespace-nowrap">Lokasi</th>
+                                                {/* Kolom Tanggal Buat dan Tanggal Update dihapus */}
+                                                <th className="px-3 py-2 text-right whitespace-nowrap">Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {garduInduks.data.length > 0 ? (
+                                                garduInduks.data.map((gardu, index) => (
+                                                    <tr key={gardu.gardu_induk_id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                                        <td className="px-3 py-2 whitespace-nowrap">
+                                                            {(garduInduks.current_page - 1) * garduInduks.per_page + index + 1}
+                                                        </td>
+                                                        <th className="px-3 py-2 text-gray-800 dark:text-gray-100 min-w-[200px] max-w-[250px]">
+                                                            <Link href={route("gardu-induk.show", gardu.gardu_induk_id)} className="hover:underline">
+                                                                {gardu.nama_gardu_induk}
+                                                            </Link>
+                                                        </th>
+                                                        {/* Lokasi */}
+                                                        <td className="px-3 py-2 whitespace-nowrap">
+                                                            {gardu.lokasi_nama || "-"}
+                                                        </td>
+                                                        
+                                                        {/* AKSI - DIBUAT VERTIKAL DAN RINGKAS */}
+                                                        <td className="px-3 py-2 text-right whitespace-nowrap">
+                                                            <div className="flex flex-col items-end gap-1">
+                                                                <Link
+                                                                    href={route("gardu-induk.edit", gardu.gardu_induk_id)}
+                                                                    className="text-xs text-blue-600 dark:text-blue-500 hover:underline"
+                                                                >
+                                                                    Edit
+                                                                </Link>
+                                                                <button
+                                                                    onClick={() => deleteGarduInduk(gardu)}
+                                                                    className="text-xs text-red-600 dark:text-red-500 hover:underline"
+                                                                >
+                                                                    Hapus
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    {/* colSpan disesuaikan dari 6 menjadi 4 (No, Nama GI, Lokasi, Aksi) */}
+                                                    <td colSpan="4" className="px-3 py-4 text-center text-gray-400">
+                                                        Tidak ada data ditemukan.
                                                     </td>
                                                 </tr>
-                                            ))
-                                        ) : (
-                                            <tr>
-                                                <td colSpan="6" className="px-3 py-4 text-center text-gray-400">
-                                                    Tidak ada data ditemukan.
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
 
-                            {/* 📱 TABEL MOBILE */}
+                            {/* 📱 TABEL MOBILE (Gaya Card/List) */}
                             <div className="md:hidden">
-                                <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                                    <thead className="text-xs uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 border-b-2 border-gray-500">
-                                        <tr>
-                                            <th className="px-2 py-2">No</th>
-                                            <th className="px-2 py-2">Gardu Induk</th>
-                                            <th className="px-2 py-2 text-right">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {garduInduks.data.length > 0 ? (
-                                            garduInduks.data.map((gardu, index) => (
-                                                <tr key={gardu.gardu_induk_id} className="border-b">
-                                                    <td className="px-2 py-3">
-                                                        {(garduInduks.current_page - 1) * garduInduks.per_page + index + 1}
-                                                    </td>
-                                                    <td className="px-2 py-3">
-                                                        <Link
-                                                            href={route("gardu-induk.show", gardu.gardu_induk_id)}
-                                                            className="font-semibold text-gray-800 dark:text-gray-100 hover:underline block mb-1"
-                                                        >
-                                                            {gardu.nama_gardu_induk}
-                                                        </Link>
-                                                        <div className="text-xs text-gray-500 dark:text-gray-400">
-                                                            Lokasi: {gardu.lokasi_nama || "-"}
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-2 py-3 text-right">
-                                                        <div className="flex flex-col gap-1">
-                                                            <Link
-                                                                href={route("gardu-induk.edit", gardu.gardu_induk_id)}
-                                                                className="text-xs font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                                                            >
-                                                                Edit
-                                                            </Link>
-                                                            <button
-                                                                onClick={() => deleteGarduInduk(gardu)}
-                                                                className="text-xs font-medium text-red-600 dark:text-red-500 hover:underline"
-                                                            >
-                                                                Hapus
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        ) : (
-                                            <tr>
-                                                <td colSpan="3" className="px-2 py-4 text-center text-gray-400">
-                                                    Tidak ada data ditemukan.
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
+                                {garduInduks.data.length > 0 ? (
+                                    garduInduks.data.map((gardu, index) => (
+                                        <div key={gardu.gardu_induk_id} className="border-b py-3 flex justify-between items-start">
+                                            {/* Data Kiri */}
+                                            <div className="flex-1 min-w-0 pr-4">
+                                                <div className="text-xs text-gray-400 dark:text-gray-500 mb-1">
+                                                     No. {(garduInduks.current_page - 1) * garduInduks.per_page + index + 1}
+                                                </div>
+                                                <Link
+                                                    href={route("gardu-induk.show", gardu.gardu_induk_id)}
+                                                    className="font-semibold text-gray-800 dark:text-gray-100 hover:underline block mb-1 truncate"
+                                                >
+                                                    {gardu.nama_gardu_induk}
+                                                </Link>
+                                                <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1 mt-1">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="font-medium text-gray-700 dark:text-gray-300">Lokasi:</span>
+                                                        <span className="truncate">{gardu.lokasi_nama || "-"}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Aksi Kanan (Vertikal) */}
+                                            <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                                                <Link
+                                                    href={route("gardu-induk.edit", gardu.gardu_induk_id)}
+                                                    className="text-xs font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                                                >
+                                                    Edit
+                                                </Link>
+                                                <button
+                                                    onClick={() => deleteGarduInduk(gardu)}
+                                                    className="text-xs font-medium text-red-600 dark:text-red-500 hover:underline"
+                                                >
+                                                    Hapus
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="py-4 text-center text-gray-400">Tidak ada data ditemukan.</p>
+                                )}
                             </div>
 
                             <Pagination links={garduInduks.links} />

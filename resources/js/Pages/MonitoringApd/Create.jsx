@@ -7,10 +7,11 @@ import { Head, useForm, Link } from "@inertiajs/react";
 import { PlusCircleIcon } from "@heroicons/react/24/solid";
 import { useState, useEffect } from "react";
 
-export default function Create({ auth, apds, apdDetails, lokasiList, garduList }) {
+// Menghapus 'apdDetails' dari props
+export default function Create({ auth, apds, lokasiList, garduList }) {
     const { data, setData, post, errors, processing, reset } = useForm({
         apd_id: "",
-        apd_detail_id: "",
+        // Menghapus apd_detail_id
         lokasi_id: "",
         gardu_induk_id: "",
         stok: "",
@@ -88,27 +89,8 @@ export default function Create({ auth, apds, apdDetails, lokasiList, garduList }
                                     <InputError message={errors.apd_id} className="mt-2" />
                                 </div>
 
-                                {/* Dropdown APD Detail */}
-                                <div>
-                                    <InputLabel htmlFor="apd_detail_id" value="Detail APD" />
-                                    <select
-                                        id="apd_detail_id"
-                                        name="apd_detail_id"
-                                        value={data.apd_detail_id}
-                                        onChange={(e) => setData("apd_detail_id", e.target.value)}
-                                        className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 
-                                            dark:bg-gray-900 dark:text-gray-300 focus:border-blue-600 focus:ring-blue-600 sm:text-sm"
-                                    >
-                                        <option value="">-- Pilih Detail APD --</option>
-                                        {apdDetails.map((detail) => (
-                                            <option key={detail.id} value={detail.id}>
-                                                {detail.nama_detail}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <InputError message={errors.apd_detail_id} className="mt-2" />
-                                </div>
-
+                                {/* Dropdown APD Detail - Dihapus */}
+                                
                                 {/* Lokasi & Gardu Induk */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>

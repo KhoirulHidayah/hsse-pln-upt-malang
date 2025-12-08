@@ -16,7 +16,6 @@ return new class extends Migration
 
             // 🔗 Relasi utama
             $table->unsignedBigInteger('apd_id')->nullable();           // FK ke apds
-            $table->unsignedBigInteger('apd_detail_id')->nullable();    // FK ke apd_details
             $table->unsignedBigInteger('user_id')->nullable();          // pemakai/pegawai
             $table->unsignedBigInteger('lokasi_id')->nullable();        // FK ke m_lokasi
             $table->unsignedBigInteger('gardu_induk_id')->nullable();   // FK ke m_gardu_induk
@@ -32,9 +31,8 @@ return new class extends Migration
             // 🚦 Notifikasi manual (dihitung di Model, bukan di database)
             $table->enum('status_notifikasi', ['Active', 'Warning', 'Expired'])->nullable();
 
-            // 🔐 Relasi antar tabel
+            // 🔗 Relasi antar tabel
             $table->foreign('apd_id')->references('id')->on('apds')->onDelete('cascade');
-            $table->foreign('apd_detail_id')->references('id')->on('apd_details')->onDelete('cascade');
             $table->foreign('lokasi_id')->references('lokasi_id')->on('lokasis')->onDelete('set null');
             $table->foreign('gardu_induk_id')->references('gardu_induk_id')->on('gardu_induks')->onDelete('set null');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');

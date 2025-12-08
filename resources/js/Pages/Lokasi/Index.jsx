@@ -40,7 +40,7 @@ export default function Index({ auth, lokasis, filters }) {
 
     // 🔽 Komponen Header yang bisa di-sort
     const SortableHeader = ({ field, label }) => (
-        <th onClick={() => sortChanged(field)} className="px-3 py-2 cursor-pointer">
+        <th onClick={() => sortChanged(field)} className="px-3 py-2 cursor-pointer whitespace-nowrap">
             <div className="flex items-center gap-1">
                 <span>{label}</span>
                 <div className="flex flex-col">
@@ -131,138 +131,134 @@ export default function Index({ auth, lokasis, filters }) {
 
                             {/* 📋 TABEL DESKTOP */}
                             <div className="hidden md:block">
-                                <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                                    <thead className="text-xs uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 border-b-2 border-gray-500">
-                                        <tr>
-                                            <th className="px-3 py-2">No</th>
-                                            <SortableHeader field="nama_lokasi" label="Nama Lokasi" />
-                                            <SortableHeader field="gardu_induk_count" label="Jumlah Gardu Induk" />
-                                            <SortableHeader field="created_at" label="Tanggal Buat" />
-                                            <SortableHeader field="updated_at" label="Tanggal Update" />
-                                            <th className="px-3 py-2 text-right">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {lokasis.data.length > 0 ? (
-                                            lokasis.data.map((lokasi, index) => (
-                                                <tr key={lokasi.lokasi_id} className="border-b">
-                                                    <td className="px-3 py-2">
-                                                        {(lokasis.current_page - 1) * lokasis.per_page + index + 1}
-                                                    </td>
-                                                    <th className="px-3 py-2 text-gray-800 dark:text-gray-100 hover:underline">
-                                                        <Link href={route("lokasi.show", lokasi.lokasi_id)}>
-                                                            {lokasi.nama_lokasi}
-                                                        </Link>
-                                                    </th>
+                                <div className="overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-lg">
+                                    <table className="min-w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                                        <thead className="text-xs uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 border-b-2 border-gray-500">
+                                            <tr>
+                                                <th className="px-3 py-2 whitespace-nowrap">No</th>
+                                                <SortableHeader field="nama_lokasi" label="Nama Lokasi" />
+                                                <SortableHeader field="gardu_induk_count" label="Jumlah Gardu Induk" />
+                                                {/* Kolom Tanggal Buat dan Tanggal Update dihapus */}
+                                                <th className="px-3 py-2 text-right whitespace-nowrap">Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {lokasis.data.length > 0 ? (
+                                                lokasis.data.map((lokasi, index) => (
+                                                    <tr key={lokasi.lokasi_id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                                        <td className="px-3 py-2 whitespace-nowrap">
+                                                            {(lokasis.current_page - 1) * lokasis.per_page + index + 1}
+                                                        </td>
+                                                        <th className="px-3 py-2 text-gray-800 dark:text-gray-100 min-w-[200px] max-w-[250px]">
+                                                            <Link href={route("lokasi.show", lokasi.lokasi_id)} className="hover:underline">
+                                                                {lokasi.nama_lokasi}
+                                                            </Link>
+                                                        </th>
 
-                                                    {/* Jumlah Gardu Induk */}
-                                                    <td className="px-3 py-2 text-center">
-                                                        <Link
-                                                            href={route("gardu-induk.index", { lokasi_id: lokasi.lokasi_id })}
-                                                            className={`inline-block px-2 py-1 rounded-full text-xs font-semibold transition duration-150 hover:scale-105 ${
-                                                                lokasi.gardu_induk_count === 0
-                                                                    ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300 hover:bg-red-200"
-                                                                    : lokasi.gardu_induk_count < 3
-                                                                    ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300 hover:bg-yellow-200"
-                                                                    : "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 hover:bg-green-200"
-                                                            }`}
-                                                        >
-                                                            {lokasi.gardu_induk_count ?? 0}
-                                                        </Link>
-                                                    </td>
+                                                        {/* Jumlah Gardu Induk */}
+                                                        <td className="px-3 py-2 text-center whitespace-nowrap">
+                                                            <Link
+                                                                href={route("gardu-induk.index", { lokasi_id: lokasi.lokasi_id })}
+                                                                className={`inline-block px-3 py-1.5 rounded-full text-xs font-semibold transition duration-150 hover:scale-105 ${
+                                                                    lokasi.gardu_induk_count === 0
+                                                                        ? "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300 hover:bg-red-200/80"
+                                                                        : lokasi.gardu_induk_count < 3
+                                                                        ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300 hover:bg-yellow-200/80"
+                                                                        : "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300 hover:bg-green-200/80"
+                                                                }`}
+                                                            >
+                                                                {lokasi.gardu_induk_count ?? 0}
+                                                            </Link>
+                                                        </td>
 
-                                                    <td className="px-3 py-2">
-                                                        {lokasi.created_at
-                                                            ? new Date(lokasi.created_at).toISOString().split("T")[0]
-                                                            : "-"}
-                                                    </td>
-                                                    <td className="px-3 py-2">
-                                                        {lokasi.updated_at
-                                                            ? new Date(lokasi.updated_at).toISOString().split("T")[0]
-                                                            : "-"}
-                                                    </td>
-                                                    <td className="px-3 py-2 text-right">
-                                                        <Link
-                                                            href={route("lokasi.edit", lokasi.lokasi_id)}
-                                                            className="font-medium text-blue-600 dark:text-blue-500 hover:underline mx-1"
-                                                        >
-                                                            Edit
-                                                        </Link>
-                                                        <button
-                                                            onClick={() => deleteLokasi(lokasi)}
-                                                            className="font-medium text-red-600 dark:text-red-500 hover:underline mx-1"
-                                                        >
-                                                            Hapus
-                                                        </button>
+                                                        {/* Kolom Tanggal Buat dan Tanggal Update Dihapus dari sini */}
+                                                        
+                                                        {/* AKSI - DIBUAT VERTIKAL DAN RINGKAS */}
+                                                        <td className="px-3 py-2 text-right whitespace-nowrap">
+                                                            <div className="flex flex-col items-end gap-1">
+                                                                <Link
+                                                                    href={route("lokasi.edit", lokasi.lokasi_id)}
+                                                                    className="text-xs text-blue-600 dark:text-blue-500 hover:underline"
+                                                                >
+                                                                    Edit
+                                                                </Link>
+                                                                <button
+                                                                    onClick={() => deleteLokasi(lokasi)}
+                                                                    className="text-xs text-red-600 dark:text-red-500 hover:underline"
+                                                                >
+                                                                    Hapus
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    {/* colSpan disesuaikan dari 6 menjadi 4 (No, Nama Lokasi, Jumlah GI, Aksi) */}
+                                                    <td colSpan="4" className="px-3 py-4 text-center text-gray-400">
+                                                        Tidak ada data lokasi ditemukan.
                                                     </td>
                                                 </tr>
-                                            ))
-                                        ) : (
-                                            <tr>
-                                                <td colSpan="6" className="px-3 py-4 text-center text-gray-400">
-                                                    Tidak ada data lokasi ditemukan.
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
 
                             {/* 📱 TABEL MOBILE */}
                             <div className="md:hidden">
-                                <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                                    <thead className="text-xs uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 border-b-2 border-gray-500">
-                                        <tr>
-                                            <th className="px-2 py-2">No</th>
-                                            <th className="px-2 py-2">Lokasi</th>
-                                            <th className="px-2 py-2 text-right">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {lokasis.data.length > 0 ? (
-                                            lokasis.data.map((lokasi, index) => (
-                                                <tr key={lokasi.lokasi_id} className="border-b">
-                                                    <td className="px-2 py-3">
-                                                        {(lokasis.current_page - 1) * lokasis.per_page + index + 1}
-                                                    </td>
-                                                    <td className="px-2 py-3">
+                                {lokasis.data.length > 0 ? (
+                                    lokasis.data.map((lokasi, index) => (
+                                        <div key={lokasi.lokasi_id} className="border-b py-3 flex justify-between items-start">
+                                            {/* Data Kiri */}
+                                            <div className="flex-1 min-w-0 pr-4">
+                                                <div className="text-xs text-gray-400 dark:text-gray-500 mb-1">
+                                                     No. {(lokasis.current_page - 1) * lokasis.per_page + index + 1}
+                                                </div>
+                                                <Link
+                                                    href={route("lokasi.show", lokasi.lokasi_id)}
+                                                    className="font-semibold text-gray-800 dark:text-gray-100 hover:underline block mb-1 truncate"
+                                                >
+                                                    {lokasi.nama_lokasi}
+                                                </Link>
+                                                <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1 mt-1">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="font-medium text-gray-700 dark:text-gray-300">Jumlah Gardu Induk:</span>
                                                         <Link
-                                                            href={route("lokasi.show", lokasi.lokasi_id)}
-                                                            className="font-semibold text-gray-800 dark:text-gray-100 hover:underline block mb-1"
+                                                            href={route("gardu-induk.index", { lokasi_id: lokasi.lokasi_id })}
+                                                            className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${
+                                                                lokasi.gardu_induk_count === 0
+                                                                    ? "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300"
+                                                                    : "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300"
+                                                            }`}
                                                         >
-                                                            {lokasi.nama_lokasi}
+                                                            {lokasi.gardu_induk_count ?? 0}
                                                         </Link>
-                                                        <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
-                                                            <div>Jumlah Gardu Induk: {lokasi.gardu_induk_count ?? 0}</div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-2 py-3 text-right">
-                                                        <div className="flex flex-col gap-1">
-                                                            <Link
-                                                                href={route("lokasi.edit", lokasi.lokasi_id)}
-                                                                className="text-xs font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                                                            >
-                                                                Edit
-                                                            </Link>
-                                                            <button
-                                                                onClick={() => deleteLokasi(lokasi)}
-                                                                className="text-xs font-medium text-red-600 dark:text-red-500 hover:underline"
-                                                            >
-                                                                Hapus
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        ) : (
-                                            <tr>
-                                                <td colSpan="3" className="px-2 py-4 text-center text-gray-400">
-                                                    Tidak ada data ditemukan.
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
+                                                    </div>
+                                                    {/* Info Tanggal Buat/Update dihapus dari sini */}
+                                                </div>
+                                            </div>
+
+                                            {/* Aksi Kanan (Vertikal) */}
+                                            <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                                                <Link
+                                                    href={route("lokasi.edit", lokasi.lokasi_id)}
+                                                    className="text-xs font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                                                >
+                                                    Edit
+                                                </Link>
+                                                <button
+                                                    onClick={() => deleteLokasi(lokasi)}
+                                                    className="text-xs font-medium text-red-600 dark:text-red-500 hover:underline"
+                                                >
+                                                    Hapus
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="py-4 text-center text-gray-400">Tidak ada data lokasi ditemukan.</p>
+                                )}
                             </div>
 
                             <Pagination links={lokasis.links} />

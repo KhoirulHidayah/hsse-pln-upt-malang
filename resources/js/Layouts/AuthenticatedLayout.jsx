@@ -12,6 +12,7 @@ import {
     MapPin,
     MapPinned,
     Bell,
+    Package,
 } from 'lucide-react';
 
 export default function AuthenticatedLayout({ header, children }) {
@@ -88,14 +89,6 @@ export default function AuthenticatedLayout({ header, children }) {
 
                         <SidebarItem
                             open={sidebarOpen}
-                            icon={<ClipboardList />}
-                            text="Detail APD"
-                            href={route('detail.index')}
-                            active={route().current('detail.*')}
-                        />
-
-                        <SidebarItem
-                            open={sidebarOpen}
                             icon={<MapPin />}
                             text="Lokasi"
                             href={route('lokasi.index')}
@@ -130,6 +123,19 @@ export default function AuthenticatedLayout({ header, children }) {
                             active={route().current('notifikasi.*')}
                             badge={notificationCount > 0 ? notificationCount : null}
                         />
+
+                        {sidebarOpen && (
+                            <SectionTitle text="Transaksi" />
+                        )}
+
+                        <SidebarItem
+                            open={sidebarOpen}
+                            icon={<Package />} 
+                            text="Serah Terima Barang"
+                            href={route('serah-terima.index')}
+                            active={route().current('serah.*')}
+                        />
+
                     </ul>
                 </nav>
             </aside>

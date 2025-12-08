@@ -23,7 +23,6 @@ class DatabaseSeeder extends Seeder
         // jalankan Seeder
         $this->call(JenisApdSeeder::class);
         $this->call(ApdSeeder::class);
-        $this->call(ApdDetailSeeder::class);
         $this->call(LokasiSeeder::class);
         $this->call(GarduIndukSeeder::class);
         $this->call(MonitoringApdSeeder::class);

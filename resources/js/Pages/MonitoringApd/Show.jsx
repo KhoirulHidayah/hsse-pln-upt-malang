@@ -33,14 +33,16 @@ export default function Show({ auth, monitoring }) {
                         <div className="p-6 text-gray-900 dark:text-gray-100">
                             {/* 🖼️ Gambar APD Detail */}
                             <div className="flex justify-center mb-6">
-                                {monitoring.apd_detail?.gambar ? (
+                                {/* PERUBAHAN: Menggunakan monitoring.apd?.gambar */}
+                                {monitoring.apd?.gambar ? (
                                     <img
                                         src={
-                                            monitoring.apd_detail.gambar.startsWith("http")
-                                                ? monitoring.apd_detail.gambar
-                                                : `/storage/${monitoring.apd_detail.gambar}`
+                                            monitoring.apd.gambar.startsWith("http")
+                                                ? monitoring.apd.gambar
+                                                : `/storage/${monitoring.apd.gambar}`
                                         }
-                                        alt={monitoring.apd_detail.nama_detail}
+                                        /* PERUBAHAN: Menggunakan monitoring.apd?.nama_apd untuk alt */
+                                        alt={monitoring.apd?.nama_apd} 
                                         className="w-64 h-64 object-cover rounded-xl border shadow-md"
                                     />
                                 ) : (
@@ -63,16 +65,17 @@ export default function Show({ auth, monitoring }) {
 
                                     <div className="mb-4">
                                         <label className="font-bold text-gray-700 dark:text-gray-300">
-                                            Nama APD
+                                            Kode APD
                                         </label>
-                                        <p>{monitoring.apd?.nama_apd || "-"}</p>
+                                        <p>{monitoring.apd?.kode_apd || "-"}</p>
                                     </div>
 
                                     <div className="mb-4">
                                         <label className="font-bold text-gray-700 dark:text-gray-300">
-                                            Detail APD
+                                            Nama APD
                                         </label>
-                                        <p>{monitoring.apd_detail?.nama_detail || "-"}</p>
+                                        {/* PERUBAHAN: Menggunakan monitoring.apd?.nama_apd */}
+                                        <p>{monitoring.apd?.nama_apd || "-"}</p> 
                                     </div>
 
                                     <div className="mb-4">
@@ -164,7 +167,7 @@ export default function Show({ auth, monitoring }) {
                                     {/* 🔔 Status */}
                                     <div className="mb-4">
                                         <label className="font-bold text-gray-700 dark:text-gray-300">
-                                            Status Notifikasi
+                                            Status Masa Berlaku
                                         </label>
                                         <div className="mt-1">
                                             <span

@@ -18,10 +18,10 @@ class NotifikasiController extends Controller
         $search = $request->input('search');
         $status = $request->input('status', 'Semua'); // Semua, Merah, Kuning, Hijau
 
-        // 📊 Hitung statistik berdasarkan status_notifikasi_otomatis
-        $today = Carbon::now();
+        // 📊 Hitung statistik berdasarkan tanggal_berakhir
+        $today = Carbon::now()->startOfDay();
         
-        $allMonitoring = MonitoringApd::with(['apd', 'apdDetail', 'lokasi', 'garduInduk'])
+        $allMonitoring = MonitoringApd::with(['apd', 'lokasi', 'garduInduk'])
             ->whereNotNull('tanggal_berakhir')
             ->get();
 
@@ -32,7 +32,7 @@ class NotifikasiController extends Controller
 
         foreach ($allMonitoring as $item) {
             $tanggalBerakhir = Carbon::parse($item->tanggal_berakhir)->startOfDay();
-            $selisih = (int) $today->startOfDay()->diffInDays($tanggalBerakhir, false);
+            $selisih = (int) $today->diffInDays($tanggalBerakhir, false);
             
             if ($selisih < 30) {
                 $expired++;
@@ -43,15 +43,14 @@ class NotifikasiController extends Controller
             }
         }
 
-        // 🔎 Query data dengan filter
-        $query = MonitoringApd::with(['apd', 'apdDetail', 'lokasi', 'garduInduk'])
+        // 🔎 Query data dengan filter (TANPA apdDetail, sesuai dengan MonitoringApdController)
+        $query = MonitoringApd::with(['apd', 'lokasi', 'garduInduk'])
             ->whereNotNull('tanggal_berakhir')
             ->when($search, function ($q) use ($search) {
                 $q->where(function($query) use ($search) {
                     $query->where('kondisi', 'like', "%{$search}%")
                         ->orWhere('catatan', 'like', "%{$search}%")
                         ->orWhereHas('apd', fn($a) => $a->where('nama_apd', 'like', "%{$search}%"))
-                        ->orWhereHas('apdDetail', fn($d) => $d->where('nama_detail', 'like', "%{$search}%"))
                         ->orWhereHas('lokasi', fn($l) => $l->where('nama_lokasi', 'like', "%{$search}%"))
                         ->orWhereHas('garduInduk', fn($g) => $g->where('nama_gardu_induk', 'like', "%{$search}%"));
                 });
@@ -64,7 +63,7 @@ class NotifikasiController extends Controller
                     ->get()
                     ->filter(function($item) use ($status, $today) {
                         $tanggalBerakhir = Carbon::parse($item->tanggal_berakhir)->startOfDay();
-                        $selisih = (int) Carbon::now()->startOfDay()->diffInDays($tanggalBerakhir, false);
+                        $selisih = (int) $today->diffInDays($tanggalBerakhir, false);
                         
                         if ($status === 'Merah' && $selisih < 30) {
                             return true;
@@ -87,7 +86,7 @@ class NotifikasiController extends Controller
             ->paginate(10)
             ->through(function ($item) use ($today) {
                 $tanggalBerakhir = Carbon::parse($item->tanggal_berakhir)->startOfDay();
-                $selisih = (int) Carbon::now()->startOfDay()->diffInDays($tanggalBerakhir, false);
+                $selisih = (int) $today->diffInDays($tanggalBerakhir, false);
                 
                 // Tentukan status dan badge
                 if ($selisih < 30) {
@@ -107,12 +106,13 @@ class NotifikasiController extends Controller
                 return [
                     'monitoring_id'         => $item->monitoring_id,
                     'apd_nama'              => optional($item->apd)->nama_apd ?? '-',
-                    'apd_detail_nama'       => optional($item->apdDetail)->nama_detail ?? '-',
-                    'apd_detail_gambar'     => $item->apdDetail && $item->apdDetail->gambar
-                                               ? asset('storage/' . $item->apdDetail->gambar)
+                    'apd_kode'              => optional($item->apd)->kode_apd ?? '-',
+                    'apd_gambar'            => $item->apd && $item->apd->gambar
+                                               ? asset('storage/' . $item->apd->gambar)
                                                : null,
                     'lokasi_nama'           => optional($item->lokasi)->nama_lokasi ?? '-',
                     'gardu_nama'            => optional($item->garduInduk)->nama_gardu_induk ?? '-',
+                    'stok'                  => $item->stok,
                     'tanggal_distribusi'    => $item->tanggal_distribusi,
                     'tanggal_berakhir'      => $item->tanggal_berakhir,
                     'kondisi'               => $item->kondisi,
@@ -121,7 +121,7 @@ class NotifikasiController extends Controller
                     'badge_color'           => $badgeColor,
                     'status_text'           => $statusText,
                     'hari_tersisa'          => $selisih,
-                    'standar'               => optional($item->apdDetail)->standar ?? '-',
+                    'standar'               => optional($item->apd)->standar ?? '-',
                     'created_at'            => $item->created_at->diffForHumans(),
                 ];
             })
@@ -158,11 +158,12 @@ class NotifikasiController extends Controller
      */
     public function show($id)
     {
-        $monitoring = MonitoringApd::with(['apd', 'apdDetail', 'lokasi', 'garduInduk'])
+        $monitoring = MonitoringApd::with(['apd', 'lokasi', 'garduInduk'])
             ->findOrFail($id);
 
+        $today = Carbon::now()->startOfDay();
         $tanggalBerakhir = Carbon::parse($monitoring->tanggal_berakhir)->startOfDay();
-        $selisih = (int) Carbon::now()->startOfDay()->diffInDays($tanggalBerakhir, false);
+        $selisih = (int) $today->diffInDays($tanggalBerakhir, false);
         
         // Tentukan status
         if ($selisih < 30) {
@@ -179,9 +180,9 @@ class NotifikasiController extends Controller
         $notificationDetail = [
             'monitoring_id'         => $monitoring->monitoring_id,
             'apd_nama'              => optional($monitoring->apd)->nama_apd ?? '-',
-            'apd_detail_nama'       => optional($monitoring->apdDetail)->nama_detail ?? '-',
-            'apd_detail_gambar'     => $monitoring->apdDetail && $monitoring->apdDetail->gambar
-                                       ? asset('storage/' . $monitoring->apdDetail->gambar)
+            'apd_kode'              => optional($monitoring->apd)->kode_apd ?? '-',
+            'apd_gambar'            => $monitoring->apd && $monitoring->apd->gambar
+                                       ? asset('storage/' . $monitoring->apd->gambar)
                                        : null,
             'lokasi_nama'           => optional($monitoring->lokasi)->nama_lokasi ?? '-',
             'gardu_nama'            => optional($monitoring->garduInduk)->nama_gardu_induk ?? '-',
@@ -194,11 +195,11 @@ class NotifikasiController extends Controller
             'status_notifikasi'     => $statusLabel,
             'badge_color'           => $badgeColor,
             'hari_tersisa'          => $selisih,
-            'standar'               => optional($monitoring->apdDetail)->standar ?? '-',
-            'bahan'                 => optional($monitoring->apdDetail)->bahan ?? '-',
-            'warna'                 => optional($monitoring->apdDetail)->warna ?? '-',
-            'ukuran'                => optional($monitoring->apdDetail)->ukuran ?? '-',
-            'fungsi'                => optional($monitoring->apdDetail)->fungsi ?? '-',
+            'standar'               => optional($monitoring->apd)->standar ?? '-',
+            'bahan'                 => optional($monitoring->apd)->bahan ?? '-',
+            'warna'                 => optional($monitoring->apd)->warna ?? '-',
+            'ukuran'                => optional($monitoring->apd)->ukuran ?? '-',
+            'fungsi'                => optional($monitoring->apd)->fungsi ?? '-',
         ];
 
         return Inertia::render('Notifikasi/Show', [

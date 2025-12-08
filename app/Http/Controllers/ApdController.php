@@ -8,46 +8,42 @@ use App\Http\Requests\StoreApdRequest;
 use App\Http\Requests\UpdateApdRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class ApdController extends Controller
 {
     /**
-     * 🧾 Tampilkan daftar data APD dengan fitur:
-     * - Pencarian (nama, kode, jenis)
-     * - Filter jenis APD
-     * - Sorting
-     * - Pagination yang mempertahankan query string
-     * - Menampilkan jumlah detail (withCount)
+     * LIST APD
      */
     public function index(Request $request)
     {
-        $query = Apd::with(['jenis', 'createdBy', 'updatedBy'])
-            ->withCount('details'); // ✅ Tambahkan ini di sini
+        $query = Apd::with(['jenis', 'createdBy', 'updatedBy']);
 
-        // 🔍 Filter pencarian (nama_apd, kode_apd, jenis_apd)
+        // Search
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('nama_apd', 'like', "%{$search}%")
                     ->orWhere('kode_apd', 'like', "%{$search}%")
+                    ->orWhere('bahan', 'like', "%{$search}%")
+                    ->orWhere('warna', 'like', "%{$search}%")
                     ->orWhereHas('jenis', function ($q2) use ($search) {
                         $q2->where('nama_jenis', 'like', "%{$search}%");
                     });
             });
         }
 
-        // 🎯 Filter berdasarkan jenis_id
+        // Filter jenis
         if ($request->filled('jenis_id')) {
             $query->where('jenis_id', $request->jenis_id);
         }
 
-        // 🔁 Sorting
+        // Sorting
         $sortField = $request->get('sortField', 'id');
         $sortDirection = $request->get('sortDirection', 'asc');
         $query->orderBy($sortField, $sortDirection);
 
-        // 📄 Pagination (10 data per halaman) + Query string agar tidak hilang
+        // Pagination
         $apds = $query->paginate(10)
             ->onEachSide(1)
             ->withQueryString()
@@ -58,7 +54,13 @@ class ApdController extends Controller
                     'nama_apd' => $apd->nama_apd,
                     'kode_apd' => $apd->kode_apd,
                     'deskripsi' => $apd->deskripsi,
-                    'details_count' => $apd->details_count, // ✅ jumlah detail
+                    'bahan' => $apd->bahan,
+                    'warna' => $apd->warna,
+                    'ukuran' => $apd->ukuran,
+                    'kemampuan' => $apd->kemampuan,
+                    'standar' => $apd->standar,
+                    'masa_penggunaan' => $apd->masa_penggunaan,
+                    'gambar' => $apd->gambar ? Storage::url($apd->gambar) : null,
                     'created_by' => $apd->createdBy?->name,
                     'updated_by' => $apd->updatedBy?->name,
                     'created_at' => optional($apd->created_at)->format('Y-m-d'),
@@ -66,7 +68,6 @@ class ApdController extends Controller
                 ];
             });
 
-        // 🔹 Kirim ke Inertia + data filter aktif
         return inertia("Apd/Index", [
             'apds' => $apds,
             'jenisApds' => JenisApd::select('id', 'nama_jenis')->get(),
@@ -75,7 +76,7 @@ class ApdController extends Controller
     }
 
     /**
-     * 🧩 Form tambah APD baru.
+     * FORM CREATE APD
      */
     public function create()
     {
@@ -85,7 +86,7 @@ class ApdController extends Controller
     }
 
     /**
-     * 💾 Simpan data APD baru.
+     * STORE APD BARU
      */
     public function store(StoreApdRequest $request)
     {
@@ -93,50 +94,22 @@ class ApdController extends Controller
         $data['created_by'] = Auth::id();
         $data['updated_by'] = Auth::id();
 
+        // Upload gambar
+        if ($request->hasFile('gambar')) {
+            $data['gambar'] = $request->file('gambar')->store('apd', 'public');
+        }
+
         Apd::create($data);
 
         return to_route('apd.index')->with('success', 'Data APD berhasil ditambahkan.');
     }
 
     /**
-     * 🔍 Tampilkan detail APD.
+     * SHOW APD
      */
     public function show(Request $request, Apd $apd)
     {
         $apd->load('jenis', 'createdBy', 'updatedBy');
-
-        // 📋 Query detail yang berelasi dengan APD ini
-        $query = $apd->details();
-
-        // 🔍 Pencarian berdasarkan nama/kode detail
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('nama_detail', 'like', "%{$search}%")
-                ->orWhere('kode_detail', 'like', "%{$search}%");
-            });
-        }
-
-        // 🔁 Sorting
-        $sortField = $request->get('sortField', 'id');
-        $sortDirection = $request->get('sortDirection', 'asc');
-        $query->orderBy($sortField, $sortDirection);
-
-        // 📄 Pagination
-        $details = $query->paginate(10)
-            ->onEachSide(1)
-            ->withQueryString()
-            ->through(fn($detail) => [
-                'id' => $detail->id,
-                'nama_detail' => $detail->nama_detail,
-                'kode_detail' => $detail->kode_detail,
-                'bahan' => $detail->bahan,
-                'warna' => $detail->warna,
-                'ukuran' => $detail->ukuran,
-                'masa_penggunaan' => $detail->masa_penggunaan,
-                'image_path' => $detail->image_path ? asset('storage/' . $detail->image_path) : null,
-                'created_at' => optional($detail->created_at)->format('Y-m-d'),
-            ]);
 
         return inertia('Apd/Show', [
             'apd' => [
@@ -145,19 +118,28 @@ class ApdController extends Controller
                 'nama_apd' => $apd->nama_apd,
                 'kode_apd' => $apd->kode_apd,
                 'deskripsi' => $apd->deskripsi,
-                'details_count' => $apd->details()->count(),
-                'created_by' => $apd->createdBy?->name,
-                'updated_by' => $apd->updatedBy?->name,
+                'bahan' => $apd->bahan,
+                'warna' => $apd->warna,
+                'ukuran' => $apd->ukuran,
+                'kemampuan' => $apd->kemampuan,
+                'fungsi' => $apd->fungsi,
+                'standar' => $apd->standar,
+                'masa_penggunaan' => $apd->masa_penggunaan,
+                'gambar' => $apd->gambar ? Storage::url($apd->gambar) : null,
+                'createdBy' => [
+                    'name' => $apd->createdBy?->name
+                ],
+                'updatedBy' => [
+                    'name' => $apd->updatedBy?->name
+                ],
                 'created_at' => optional($apd->created_at)->format('Y-m-d'),
                 'updated_at' => optional($apd->updated_at)->format('Y-m-d'),
             ],
-            'details' => $details,
-            'filters' => $request->only(['search', 'sortField', 'sortDirection']),
         ]);
     }
 
     /**
-     * ✏️ Form edit APD.
+     * EDIT APD
      */
     public function edit(Apd $apd)
     {
@@ -168,18 +150,41 @@ class ApdController extends Controller
                 'nama_apd' => $apd->nama_apd,
                 'kode_apd' => $apd->kode_apd,
                 'deskripsi' => $apd->deskripsi,
+                'bahan' => $apd->bahan,
+                'warna' => $apd->warna,
+                'ukuran' => $apd->ukuran,
+                'kemampuan' => $apd->kemampuan,
+                'fungsi' => $apd->fungsi,
+                'standar' => $apd->standar,
+                'masa_penggunaan' => $apd->masa_penggunaan,
+                'gambar' => $apd->gambar ? Storage::url($apd->gambar) : null,
             ],
             'jenisApds' => JenisApd::select('id', 'nama_jenis')->get(),
         ]);
     }
 
     /**
-     * 🔄 Update data APD.
+     * UPDATE APD
      */
     public function update(UpdateApdRequest $request, Apd $apd)
     {
         $data = $request->validated();
         $data['updated_by'] = Auth::id();
+
+        // Jika upload gambar baru
+        if ($request->hasFile('gambar')) {
+
+            // Hapus gambar lama
+            if ($apd->gambar && Storage::disk('public')->exists($apd->gambar)) {
+                Storage::disk('public')->delete($apd->gambar);
+            }
+
+            // Simpan gambar baru
+            $data['gambar'] = $request->file('gambar')->store('apd', 'public');
+        } else {
+            // Jangan hapus gambar lama, jangan ubah field gambar
+            unset($data['gambar']);
+        }
 
         $apd->update($data);
 
@@ -187,10 +192,14 @@ class ApdController extends Controller
     }
 
     /**
-     * 🗑️ Hapus data APD.
+     * DELETE APD
      */
     public function destroy(Apd $apd)
     {
+        if ($apd->gambar && Storage::disk('public')->exists($apd->gambar)) {
+            Storage::disk('public')->delete($apd->gambar);
+        }
+
         $name = $apd->nama_apd;
         $apd->delete();
 

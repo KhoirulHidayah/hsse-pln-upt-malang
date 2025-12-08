@@ -1,13 +1,13 @@
 <?php
 
 use App\Http\Controllers\ApdController;
-use App\Http\Controllers\ApdDetailController;
 use App\Http\Controllers\JenisApdController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LokasiController;
 use App\Http\Controllers\GarduIndukController;
 use App\Http\Controllers\MonitoringApdController;
 use App\Http\Controllers\NotifikasiController;
+use App\Http\Controllers\SerahTerimaController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -20,7 +20,6 @@ Route::middleware(['auth', 'verified'])->group(function(){
 
     Route::resource('jenis-apd', JenisApdController::class);
     Route::resource('apd', ApdController::class);
-    Route::resource('detail', ApdDetailController::class);
     Route::resource('lokasi', LokasiController::class);
     Route::resource('gardu-induk', GarduIndukController::class);
     Route::post('/monitoring-apd/import', [MonitoringApdController::class, 'import'])
@@ -29,6 +28,11 @@ Route::middleware(['auth', 'verified'])->group(function(){
         ->name('monitoring-apd.template');
     Route::resource('monitoring-apd', MonitoringApdController::class);
     Route::resource('notifikasi', NotifikasiController::class);
+    Route::resource('serah-terima', SerahTerimaController::class);
+    
+    Route::get('/serah-terima/{id}/pdf', [SerahTerimaController::class, 'exportPdf'])
+        ->name('serah-terima.pdf');
+
 
 });
 
