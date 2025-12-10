@@ -4,13 +4,13 @@ import TextInput from "@/Components/TextInput";
 import { Head, Link, router, usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/16/solid";
-import { Shield, Plus, Pencil, Trash2 } from "lucide-react";
+import { Shield, Plus, Pencil, Trash2, HardHat } from "lucide-react";
 
 export default function Index({ auth, jenisApds, filters }) {
     const [search, setSearch] = useState(filters.search || "");
     const { flash } = usePage().props;
 
-    // 🔍 Sorting kolom
+    // 🔀 Sorting kolom
     const sortChanged = (field) => {
         router.get(
             route("jenis-apd.index"),
@@ -39,23 +39,23 @@ export default function Index({ auth, jenisApds, filters }) {
     }, [search]);
 
     // 📽 Komponen header sortable
-    const SortableHeader = ({ field, label }) => (
-        <th onClick={() => sortChanged(field)} className="px-2 py-2 cursor-pointer whitespace-nowrap"> {/* Mengubah px-3 py-2.5 menjadi px-2 py-2 */}
-            <div className="flex items-center gap-1.5">
+    const SortableHeader = ({ field, label, className }) => (
+        <th onClick={() => sortChanged(field)} className={`px-2 py-1.5 cursor-pointer whitespace-nowrap ${className ?? ''}`}>
+            <div className="flex items-center gap-1">
                 <span>{label}</span>
                 <div className="flex flex-col">
                     <ChevronUpIcon
                         className={`w-3 h-3 ${
                             filters.sortField === field && filters.sortDirection === "asc"
                                 ? "text-cyan-600"
-                                : "text-gray-400"
+                                : ""
                         }`}
                     />
                     <ChevronDownIcon
                         className={`w-3 h-3 -mt-1 ${
                             filters.sortField === field && filters.sortDirection === "desc"
                                 ? "text-cyan-600"
-                                : "text-gray-400"
+                                : ""
                         }`}
                     />
                 </div>
@@ -113,7 +113,7 @@ export default function Index({ auth, jenisApds, filters }) {
                     <div className="overflow-hidden bg-white shadow-md sm:rounded-lg dark:bg-gray-800">
                         <div className="p-3 text-gray-900 dark:text-gray-100">
                             {/* 🔎 Filter pencarian */}
-                            <div className="mb-3">
+                            <div className="mb-2">
                                 <TextInput
                                     className="w-full md:w-80 text-sm h-9"
                                     placeholder="Cari nama jenis APD..."
@@ -126,23 +126,23 @@ export default function Index({ auth, jenisApds, filters }) {
                             <div className="hidden md:block">
                                 <div className="overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-lg">
                                     <table className="min-w-full text-sm text-gray-700 dark:text-gray-300">
-                                        <thead className="text-xs font-semibold uppercase bg-gradient-to-r from-cyan-50 to-teal-50 dark:from-gray-700 dark:to-gray-600 text-gray-700 dark:text-gray-200 border-b-2 border-cyan-200 dark:border-gray-600">
+                                        <thead className="text-[11px] font-semibold uppercase bg-gradient-to-r from-cyan-50 to-teal-50 dark:from-gray-700 dark:to-gray-600 text-gray-700 dark:text-gray-200 border-b-2 border-cyan-200 dark:border-gray-600">
                                             <tr>
-                                                <th className="px-2 py-2 text-center whitespace-nowrap w-16">No</th> {/* Mengubah px-3 py-2.5 menjadi px-2 py-2 */}
+                                                <th className="px-2 py-1.5 text-center whitespace-nowrap w-10">No</th>
                                                 <SortableHeader field="nama_jenis" label="Nama Jenis APD" />
-                                                <th className="px-2 py-2 whitespace-nowrap">Deskripsi</th> {/* Mengubah px-3 py-2.5 menjadi px-2 py-2 */}
-                                                <SortableHeader field="apds_count" label="Jumlah APD" />
-                                                <th className="px-2 py-2 text-center whitespace-nowrap w-24">Aksi</th> {/* Mengubah px-3 py-2.5 menjadi px-2 py-2 */}
+                                                <th className="px-2 py-1.5 whitespace-nowrap">Deskripsi</th>
+                                                <SortableHeader field="apds_count" label="Jumlah APD" className="w-32 text-center" />
+                                                <th className="px-2 py-1.5 text-center whitespace-nowrap w-20">Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                                             {jenisApds.data.length > 0 ? (
                                                 jenisApds.data.map((jenis, index) => (
                                                     <tr key={jenis.id} className="hover:bg-cyan-50 dark:hover:bg-gray-700/50 transition-colors">
-                                                        <td className="px-2 py-2 text-center text-gray-600 dark:text-gray-400 font-medium"> {/* Mengubah px-3 py-2.5 menjadi px-2 py-2 */}
+                                                        <td className="px-2 py-1.5 text-center text-gray-600 dark:text-gray-400 font-medium text-sm">
                                                             {(jenisApds.current_page - 1) * jenisApds.per_page + index + 1}
                                                         </td>
-                                                        <td className="px-2 py-2 font-semibold text-gray-800 dark:text-gray-100"> {/* Mengubah px-3 py-2.5 menjadi px-2 py-2 */}
+                                                        <td className="px-2 py-1.5 font-semibold text-gray-800 dark:text-gray-100 text-sm">
                                                             <Link 
                                                                 href={route("jenis-apd.show", jenis.id)} 
                                                                 className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
@@ -150,17 +150,17 @@ export default function Index({ auth, jenisApds, filters }) {
                                                                 {jenis.nama_jenis}
                                                             </Link>
                                                         </td>
-                                                        <td className="px-2 py-2 text-gray-600 dark:text-gray-400 max-w-md leading-relaxed"> {/* Mengubah px-3 py-2.5 menjadi px-2 py-2 */}
+                                                        <td className="px-2 py-1.5 text-gray-600 dark:text-gray-400 max-w-md leading-relaxed text-sm">
                                                             <div className="line-clamp-2">
                                                                 {jenis.deskripsi || <span className="text-gray-400 italic">Tidak ada deskripsi</span>}
                                                             </div>
                                                         </td>
 
-                                                        {/* Jumlah APD */}
-                                                        <td className="px-2 py-2 text-center"> {/* Mengubah px-3 py-2.5 menjadi px-2 py-2 */}
+                                                        {/* Jumlah APD - DENGAN IKON */}
+                                                        <td className="px-2 py-1.5 text-center">
                                                             <Link
                                                                 href={route("apd.index", { jenis_id: jenis.id })}
-                                                                className={`inline-flex items-center justify-center px-2.5 py-1 rounded-full text-xs font-bold transition-all hover:scale-105 shadow-sm ${
+                                                                className={`inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold transition-all hover:scale-105 shadow-sm ${
                                                                     jenis.apds_count === 0
                                                                         ? "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300 hover:bg-red-200"
                                                                         : jenis.apds_count < 5
@@ -168,13 +168,14 @@ export default function Index({ auth, jenisApds, filters }) {
                                                                         : "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300 hover:bg-green-200"
                                                                 }`}
                                                             >
+                                                                <HardHat className="h-3 w-3" />
                                                                 {jenis.apds_count ?? 0}
                                                             </Link>
                                                         </td>
 
-                                                        {/* AKSI - DENGAN ICON */}
-                                                        <td className="px-2 py-2"> {/* Mengubah px-3 py-2.5 menjadi px-2 py-2 */}
-                                                            <div className="flex items-center justify-center gap-2">
+                                                        {/* AKSI - HORIZONTAL */}
+                                                        <td className="px-2 py-1.5 text-center">
+                                                            <div className="flex items-center justify-center gap-1.5">
                                                                 <Link
                                                                     href={route("jenis-apd.edit", jenis.id)}
                                                                     className="inline-flex items-center justify-center p-1.5 rounded-md text-cyan-600 dark:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-all group"
@@ -225,11 +226,13 @@ export default function Index({ auth, jenisApds, filters }) {
                                                     <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">
                                                         {jenis.deskripsi || "Tidak ada deskripsi."}
                                                     </p>
+                                                    
+                                                    {/* Info Jumlah APD */}
                                                     <div className="flex items-center gap-2 text-xs">
                                                         <span className="font-medium text-gray-700 dark:text-gray-300">Jumlah APD:</span>
                                                         <Link
                                                             href={route("apd.index", { jenis_id: jenis.id })}
-                                                            className={`inline-block px-2 py-0.5 rounded-full font-bold ${
+                                                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-bold ${
                                                                 jenis.apds_count === 0
                                                                     ? "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300"
                                                                     : jenis.apds_count < 5
@@ -237,26 +240,26 @@ export default function Index({ auth, jenisApds, filters }) {
                                                                     : "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300"
                                                             }`}
                                                         >
+                                                            <HardHat className="h-3 w-3" />
                                                             {jenis.apds_count ?? 0}
                                                         </Link>
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            {/* Aksi Mobile - Dengan Icon */}
+                                            {/* Aksi Mobile */}
                                             <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
                                                 <Link
                                                     href={route("jenis-apd.edit", jenis.id)}
-                                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium text-cyan-600 dark:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-all"
+                                                    className="text-xs font-medium text-cyan-600 dark:text-cyan-400 hover:text-cyan-800"
                                                 >
-                                                    <Pencil className="h-3.5 w-3.5" />
                                                     Edit
                                                 </Link>
+                                                <span className="text-gray-300 text-xs">|</span>
                                                 <button
                                                     onClick={() => deleteJenisApd(jenis)}
-                                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+                                                    className="text-xs font-medium text-red-600 dark:text-red-400 hover:text-red-800"
                                                 >
-                                                    <Trash2 className="h-3.5 w-3.5" />
                                                     Hapus
                                                 </button>
                                             </div>

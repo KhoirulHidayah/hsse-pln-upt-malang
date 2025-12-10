@@ -27,9 +27,7 @@ return new class extends Migration
             $table->date('tanggal_berakhir')->nullable();
             $table->enum('kondisi', ['Baik', 'Rusak', 'Perlu Diganti'])->default('Baik');
             $table->text('catatan')->nullable();
-
-            // 🚦 Notifikasi manual (dihitung di Model, bukan di database)
-            $table->enum('status_notifikasi', ['Active', 'Warning', 'Expired'])->nullable();
+            $table->boolean('is_read')->default(false);
 
             // 🔗 Relasi antar tabel
             $table->foreign('apd_id')->references('id')->on('apds')->onDelete('cascade');

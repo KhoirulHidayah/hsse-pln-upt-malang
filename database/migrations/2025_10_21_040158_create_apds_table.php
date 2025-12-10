@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('gambar')->nullable();
 
             // Spesifikasi APD
-            $table->string('bahan', 100)->nullable();
+            $table->string('bahan')->nullable();
             $table->string('warna', 50)->nullable();
             $table->string('ukuran', 50)->nullable();
             $table->string('kemampuan', 100)->nullable();

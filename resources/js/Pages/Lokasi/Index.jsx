@@ -4,14 +4,13 @@ import TextInput from "@/Components/TextInput";
 import { Head, Link, router, usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/16/solid";
-// Menambahkan ikon untuk Aksi agar bisa dipertimbangkan jika ingin diganti.
-import { MapPin, Plus, Pencil, Trash2 } from "lucide-react"; 
+import { MapPin, Plus, Pencil, Trash2, ClipboardCheck, Building2 } from "lucide-react";
 
 export default function Index({ auth, lokasis, filters }) {
     const [search, setSearch] = useState(filters.search || "");
     const { flash } = usePage().props;
 
-    // 🔍 Sorting kolom
+    // 🔀 Sorting kolom
     const sortChanged = (field) => {
         router.get(
             route("lokasi.index"),
@@ -40,8 +39,8 @@ export default function Index({ auth, lokasis, filters }) {
     }, [search]);
 
     // 📽 Komponen Header yang bisa di-sort
-    const SortableHeader = ({ field, label, className }) => ( // 🛠️ TAMBAH className
-        <th onClick={() => sortChanged(field)} className={`px-2 py-1.5 cursor-pointer whitespace-nowrap ${className ?? ''}`}> {/* 🛠️ GUNAKAN className */}
+    const SortableHeader = ({ field, label, className }) => (
+        <th onClick={() => sortChanged(field)} className={`px-2 py-1.5 cursor-pointer whitespace-nowrap ${className ?? ''}`}>
             <div className="flex items-center gap-1">
                 <span>{label}</span>
                 <div className="flex flex-col">
@@ -131,7 +130,8 @@ export default function Index({ auth, lokasis, filters }) {
                                             <tr>
                                                 <th className="px-2 py-1.5 text-center whitespace-nowrap w-10">No</th>
                                                 <SortableHeader field="nama_lokasi" label="Nama Lokasi" />
-                                                <SortableHeader field="gardu_induk_count" label="Jumlah Gardu Induk" className="w-36" /> {/* 🛠️ TAMBAH w-36 */}
+                                                <SortableHeader field="gardu_induk_count" label="Jumlah Gardu" className="w-32 text-center" />
+                                                <SortableHeader field="monitoring_apd_count" label="Jumlah Monitoring APD" className="w-32 text-center" />
                                                 <th className="px-2 py-1.5 text-center whitespace-nowrap w-20">Aksi</th>
                                             </tr>
                                         </thead>
@@ -151,11 +151,11 @@ export default function Index({ auth, lokasis, filters }) {
                                                             </Link>
                                                         </td>
 
-                                                        {/* Jumlah Gardu Induk */}
+                                                        {/* Jumlah Gardu Induk - DENGAN IKON */}
                                                         <td className="px-2 py-1.5 text-center">
                                                             <Link
                                                                 href={route("gardu-induk.index", { lokasi_id: lokasi.lokasi_id })}
-                                                                className={`inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-bold transition-all hover:scale-105 shadow-sm ${
+                                                                className={`inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold transition-all hover:scale-105 shadow-sm ${
                                                                     lokasi.gardu_induk_count === 0
                                                                         ? "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300 hover:bg-red-200"
                                                                         : lokasi.gardu_induk_count < 3
@@ -163,14 +163,29 @@ export default function Index({ auth, lokasis, filters }) {
                                                                         : "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300 hover:bg-green-200"
                                                                 }`}
                                                             >
+                                                                <Building2 className="h-3 w-3" />
                                                                 {lokasi.gardu_induk_count ?? 0}
+                                                            </Link>
+                                                        </td>
+
+                                                        {/* Jumlah APD/Monitoring - DENGAN IKON */}
+                                                        <td className="px-2 py-1.5 text-center">
+                                                            <Link
+                                                                href={route("monitoring-apd.index", { lokasi_id: lokasi.lokasi_id })}
+                                                                className={`inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold transition-all hover:scale-105 shadow-sm ${
+                                                                    lokasi.monitoring_apd_count === 0
+                                                                        ? "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 hover:bg-gray-200"
+                                                                        : "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/50 dark:text-cyan-300 hover:bg-cyan-200"
+                                                                }`}
+                                                            >
+                                                                <ClipboardCheck className="h-3 w-3" />
+                                                                {lokasi.monitoring_apd_count ?? 0}
                                                             </Link>
                                                         </td>
 
                                                         {/* AKSI - HORIZONTAL */}
                                                         <td className="px-2 py-1.5 text-center">
                                                             <div className="flex items-center justify-center gap-1.5">
-                                                                {/* Tombol Edit dengan Ikon */}
                                                                 <Link
                                                                     href={route("lokasi.edit", lokasi.lokasi_id)}
                                                                     className="inline-flex items-center justify-center p-1.5 rounded-md text-cyan-600 dark:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-all group"
@@ -179,7 +194,6 @@ export default function Index({ auth, lokasis, filters }) {
                                                                     <Pencil className="h-4 w-4 group-hover:scale-110 transition-transform" />
                                                                 </Link>
                                                                 
-                                                                {/* Tombol Hapus dengan Ikon */}
                                                                 <button
                                                                     onClick={() => deleteLokasi(lokasi)}
                                                                     className="inline-flex items-center justify-center p-1.5 rounded-md text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all group"
@@ -193,7 +207,7 @@ export default function Index({ auth, lokasis, filters }) {
                                                 ))
                                             ) : (
                                                 <tr>
-                                                    <td colSpan="4" className="px-4 py-8 text-center text-gray-400">
+                                                    <td colSpan="5" className="px-4 py-8 text-center text-gray-400">
                                                         <MapPin className="h-12 w-12 mx-auto mb-2 opacity-30" />
                                                         <p>Tidak ada data ditemukan</p>
                                                     </td>
@@ -214,31 +228,51 @@ export default function Index({ auth, lokasis, filters }) {
                                                     <div className="text-xs text-gray-400 dark:text-gray-500 mb-1">
                                                         No. {(lokasis.current_page - 1) * lokasis.per_page + index + 1}
                                                     </div>
-                                                    <Link
-                                                        href={route("lokasi.show", lokasi.lokasi_id)}
-                                                        className="font-semibold text-sm text-gray-800 dark:text-gray-100 hover:text-cyan-600 dark:hover:text-cyan-400 block mb-2"
-                                                    >
-                                                        {lokasi.nama_lokasi}
-                                                    </Link>
-                                                    <div className="flex items-center gap-2 text-xs">
-                                                        <span className="font-medium text-gray-700 dark:text-gray-300">Jumlah Gardu Induk:</span>
-                                                        <Link
-                                                            href={route("gardu-induk.index", { lokasi_id: lokasi.lokasi_id })}
-                                                            className={`inline-block px-2 py-0.5 rounded-full font-bold ${
-                                                                lokasi.gardu_induk_count === 0
-                                                                    ? "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300"
-                                                                    : lokasi.gardu_induk_count < 3
-                                                                    ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300"
-                                                                    : "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300"
-                                                            }`}
+                                                    <Link 
+                                                            href={route("lokasi.show", lokasi.lokasi_id)} 
+                                                            className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
                                                         >
-                                                            {lokasi.gardu_induk_count ?? 0}
-                                                        </Link>
+                                                            {lokasi.nama_lokasi}
+                                                    </Link>
+                                                    
+                                                    {/* Info Gardu & APD */}
+                                                    <div className="space-y-1">
+                                                        <div className="flex items-center gap-2 text-xs">
+                                                            <span className="font-medium text-gray-700 dark:text-gray-300">Gardu:</span>
+                                                            <Link
+                                                                href={route("gardu-induk.index", { lokasi_id: lokasi.lokasi_id })}
+                                                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-bold ${
+                                                                    lokasi.gardu_induk_count === 0
+                                                                        ? "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300"
+                                                                        : lokasi.gardu_induk_count < 3
+                                                                        ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300"
+                                                                        : "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300"
+                                                                }`}
+                                                            >
+                                                                <Building2 className="h-3 w-3" />
+                                                                {lokasi.gardu_induk_count ?? 0}
+                                                            </Link>
+                                                        </div>
+                                                        
+                                                        <div className="flex items-center gap-2 text-xs">
+                                                            <span className="font-medium text-gray-700 dark:text-gray-300">APD:</span>
+                                                            <Link
+                                                                href={route("monitoring-apd.index", { lokasi_id: lokasi.lokasi_id })}
+                                                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-bold ${
+                                                                    lokasi.monitoring_apd_count === 0
+                                                                        ? "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400"
+                                                                        : "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/50 dark:text-cyan-300"
+                                                                }`}
+                                                            >
+                                                                <ClipboardCheck className="h-3 w-3" />
+                                                                {lokasi.monitoring_apd_count ?? 0}
+                                                            </Link>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            {/* Aksi (Mobile - Horizontal, tetap menggunakan teks) */}
+                                            {/* Aksi (Mobile) */}
                                             <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
                                                 <Link
                                                     href={route("lokasi.edit", lokasi.lokasi_id)}

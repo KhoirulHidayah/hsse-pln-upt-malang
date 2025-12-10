@@ -5,15 +5,14 @@ import Select from "@/Components/Select";
 import { Head, Link, router, usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/16/solid";
-// Menambahkan ikon untuk Aksi
-import { MapPinned, Plus, Pencil, Trash2 } from "lucide-react"; 
+import { MapPinned, Plus, Pencil, Trash2, ClipboardCheck } from "lucide-react";
 
 export default function Index({ auth, garduInduks, lokasis, filters }) {
     const [search, setSearch] = useState(filters.search || "");
     const [lokasiFilter, setLokasiFilter] = useState(filters.lokasi_id || "");
     const { flash } = usePage().props;
 
-    // 🔍 Fungsi sorting kolom
+    // 🔀 Fungsi sorting kolom
     const sortChanged = (field) => {
         router.get(
             route("gardu-induk.index"),
@@ -43,8 +42,8 @@ export default function Index({ auth, garduInduks, lokasis, filters }) {
     }, [search, lokasiFilter]);
 
     // 📽 Header kolom sortable
-    const SortableHeader = ({ field, label }) => (
-        <th onClick={() => sortChanged(field)} className="px-2 py-1.5 cursor-pointer whitespace-nowrap">
+    const SortableHeader = ({ field, label, className }) => (
+        <th onClick={() => sortChanged(field)} className={`px-2 py-1.5 cursor-pointer whitespace-nowrap ${className ?? ''}`}>
             <div className="flex items-center gap-1">
                 <span>{label}</span>
                 <div className="flex flex-col">
@@ -145,8 +144,8 @@ export default function Index({ auth, garduInduks, lokasis, filters }) {
                                                 <th className="px-2 py-1.5 text-center whitespace-nowrap w-10">No</th>
                                                 <SortableHeader field="nama_gardu_induk" label="Nama Gardu Induk" />
                                                 <SortableHeader field="lokasi.nama_lokasi" label="Lokasi" />
-                                                {/* Mengubah lebar kolom Aksi */}
-                                                <th className="px-2 py-1.5 text-center whitespace-nowrap w-24">Aksi</th>
+                                                <SortableHeader field="monitoring_apd_count" label="Jumlah Monitoring APD" className="w-32 text-center" />
+                                                <th className="px-2 py-1.5 text-center whitespace-nowrap w-20">Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -164,22 +163,36 @@ export default function Index({ auth, garduInduks, lokasis, filters }) {
                                                                 {gardu.nama_gardu_induk}
                                                             </Link>
                                                         </td>
-                                                        {/* Lokasi */}
-                                                        {/* Menghapus w-40 agar menyesuaikan konten */}
                                                         <td className="px-2 py-1.5 text-gray-600 dark:text-gray-400 text-sm">
                                                             {gardu.lokasi_nama || "-"}
                                                         </td>
+
+                                                        {/* Jumlah APD/Monitoring - DENGAN IKON */}
+                                                        <td className="px-2 py-1.5 text-center">
+                                                            <Link
+                                                                href={route("monitoring-apd.index", { 
+                                                                    gardu_induk_id: gardu.gardu_induk_id 
+                                                                })}
+                                                                className={`inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold transition-all hover:scale-105 shadow-sm ${
+                                                                    gardu.monitoring_apd_count === 0
+                                                                        ? "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 hover:bg-gray-200"
+                                                                        : "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/50 dark:text-cyan-300 hover:bg-cyan-200"
+                                                                }`}
+                                                            >
+                                                                <ClipboardCheck className="h-3 w-3" />
+                                                                {gardu.monitoring_apd_count ?? 0}
+                                                            </Link>
+                                                        </td>
                                                         
                                                         {/* AKSI - HORIZONTAL DENGAN IKON */}
-                                                        <td className="px-2 py-1.5">
-                                                            <div className="flex items-center justify-center gap-1.5"> {/* Mengubah flex-col menjadi flex dan gap-0.5 menjadi gap-1.5 */}
+                                                        <td className="px-2 py-1.5 text-center">
+                                                            <div className="flex items-center justify-center gap-1.5">
                                                                 <Link
                                                                     href={route("gardu-induk.edit", gardu.gardu_induk_id)}
                                                                     className="inline-flex items-center justify-center p-1.5 rounded-md text-cyan-600 dark:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-all group"
                                                                     title="Edit Gardu Induk"
                                                                 >
                                                                     <Pencil className="h-4 w-4 group-hover:scale-110 transition-transform" />
-                                                                    {/* Menghapus teks "Edit" */}
                                                                 </Link>
                                                                 <button
                                                                     onClick={() => deleteGarduInduk(gardu)}
@@ -187,7 +200,6 @@ export default function Index({ auth, garduInduks, lokasis, filters }) {
                                                                     title="Hapus Gardu Induk"
                                                                 >
                                                                     <Trash2 className="h-4 w-4 group-hover:scale-110 transition-transform" />
-                                                                    {/* Menghapus teks "Hapus" */}
                                                                 </button>
                                                             </div>
                                                         </td>
@@ -195,7 +207,7 @@ export default function Index({ auth, garduInduks, lokasis, filters }) {
                                                 ))
                                             ) : (
                                                 <tr>
-                                                    <td colSpan="4" className="px-4 py-8 text-center text-gray-400">
+                                                    <td colSpan="5" className="px-4 py-8 text-center text-gray-400">
                                                         <MapPinned className="h-12 w-12 mx-auto mb-2 opacity-30" />
                                                         <p>Tidak ada data ditemukan</p>
                                                     </td>
@@ -222,9 +234,30 @@ export default function Index({ auth, garduInduks, lokasis, filters }) {
                                                     >
                                                         {gardu.nama_gardu_induk}
                                                     </Link>
-                                                    <div className="text-xs text-gray-600 dark:text-gray-400">
-                                                        <span className="font-medium text-gray-700 dark:text-gray-300">Lokasi: </span>
-                                                        {gardu.lokasi_nama || "-"}
+                                                    
+                                                    {/* Info Lokasi & APD */}
+                                                    <div className="space-y-1">
+                                                        <div className="text-xs text-gray-600 dark:text-gray-400">
+                                                            <span className="font-medium text-gray-700 dark:text-gray-300">Lokasi: </span>
+                                                            {gardu.lokasi_nama || "-"}
+                                                        </div>
+                                                        
+                                                        <div className="flex items-center gap-2 text-xs">
+                                                            <span className="font-medium text-gray-700 dark:text-gray-300">APD:</span>
+                                                            <Link
+                                                                href={route("monitoring-apd.index", { 
+                                                                    gardu_induk_id: gardu.gardu_induk_id 
+                                                                })}
+                                                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-bold ${
+                                                                    gardu.monitoring_apd_count === 0
+                                                                        ? "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400"
+                                                                        : "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/50 dark:text-cyan-300"
+                                                                }`}
+                                                            >
+                                                                <ClipboardCheck className="h-3 w-3" />
+                                                                {gardu.monitoring_apd_count ?? 0}
+                                                            </Link>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>

@@ -8,6 +8,7 @@ use App\Http\Controllers\GarduIndukController;
 use App\Http\Controllers\MonitoringApdController;
 use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\SerahTerimaController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -15,8 +16,9 @@ use Inertia\Inertia;
 Route::redirect('/', 'dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function(){
-    Route::get('/dashboard', fn()=> Inertia::render('Dashboard') )
-    ->name('dashboard');
+    // Ubah dari closure menjadi controller
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->name('dashboard');
 
     Route::resource('jenis-apd', JenisApdController::class);
     Route::resource('apd', ApdController::class);
@@ -27,13 +29,17 @@ Route::middleware(['auth', 'verified'])->group(function(){
     Route::get('/monitoring-apd/template', [MonitoringApdController::class, 'template'])
         ->name('monitoring-apd.template');
     Route::resource('monitoring-apd', MonitoringApdController::class);
-    Route::resource('notifikasi', NotifikasiController::class);
+        // Notifikasi Routes
+    Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
+    Route::get('/notifikasi/preview', [NotifikasiController::class, 'preview'])->name('notifikasi.preview');
+    Route::get('/notifikasi/{id}', [NotifikasiController::class, 'show'])->name('notifikasi.show');
+    Route::post('/notifikasi/mark-all-read', [NotifikasiController::class, 'markAllAsRead'])->name('notifikasi.markAllAsRead');
+    Route::post('/notifikasi/{id}/mark-as-read', [NotifikasiController::class, 'markAsRead'])->name('notifikasi.markAsRead');
+    
     Route::resource('serah-terima', SerahTerimaController::class);
     
     Route::get('/serah-terima/{id}/pdf', [SerahTerimaController::class, 'exportPdf'])
         ->name('serah-terima.pdf');
-
-
 });
 
 Route::middleware('auth')->group(function () {

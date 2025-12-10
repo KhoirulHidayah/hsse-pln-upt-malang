@@ -18,11 +18,12 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Border;
+use Carbon\Carbon;
 
 class MonitoringApdController extends Controller
 {
     /**
-     * 📋 Tampilkan daftar Monitoring APD (tanpa user).
+     * 📋 Tampilkan daftar Monitoring APD
      */
     public function index(Request $request)
     {
@@ -35,7 +36,7 @@ class MonitoringApdController extends Controller
         $sortField      = $request->input('sortField', 'tanggal_distribusi');
         $sortDirection  = $request->input('sortDirection', 'desc');
 
-        // 🔎 Query data dengan relasi (TANPA apdDetail)
+        // 🔎 Query data dengan relasi
         $query = MonitoringApd::with(['apd', 'lokasi', 'garduInduk'])
             ->when($search, function ($q) use ($search) {
                 $q->where('kondisi', 'like', "%{$search}%")
@@ -47,12 +48,48 @@ class MonitoringApdController extends Controller
             })
             ->when($lokasi_id, fn($q) => $q->where('lokasi_id', $lokasi_id))
             ->when($gardu_induk_id, fn($q) => $q->where('gardu_induk_id', $gardu_induk_id))
-            ->when($kondisi, fn($q) => $q->where('kondisi', $kondisi))
-            ->when($status_notifikasi, fn($q) => $q->where('status_notifikasi', $status_notifikasi))
-            ->orderBy($sortField, $sortDirection);
+            ->when($kondisi, fn($q) => $q->where('kondisi', $kondisi));
 
-        // 📄 Pagination + ubah format data
+        // ✅ PERBAIKAN: Filter status notifikasi DINAMIS
+        if ($status_notifikasi) {
+            if ($status_notifikasi === 'Expired') {
+                $query->whereNotNull('tanggal_berakhir')
+                    ->whereRaw('DATEDIFF(tanggal_berakhir, CURDATE()) < 30');
+            } elseif ($status_notifikasi === 'Warning') {
+                $query->whereNotNull('tanggal_berakhir')
+                    ->whereRaw('DATEDIFF(tanggal_berakhir, CURDATE()) BETWEEN 30 AND 90');
+            } elseif ($status_notifikasi === 'Active') {
+                $query->whereNotNull('tanggal_berakhir')
+                    ->whereRaw('DATEDIFF(tanggal_berakhir, CURDATE()) > 90');
+            }
+        }
+
+        // Sorting
+        $query->orderBy($sortField, $sortDirection);
+
+        // 🔄 Pagination + format data
         $monitorings = $query->paginate(10)->through(function ($item) {
+            // ✅ Hitung status dinamis
+            $today = Carbon::now()->startOfDay();
+            $tanggalBerakhir = $item->tanggal_berakhir 
+                ? Carbon::parse($item->tanggal_berakhir)->startOfDay() 
+                : null;
+            
+            $selisih = $tanggalBerakhir 
+                ? (int) $today->diffInDays($tanggalBerakhir, false) 
+                : null;
+            
+            $statusNotifikasi = 'Active';
+            if ($selisih !== null) {
+                if ($selisih < 30) {
+                    $statusNotifikasi = 'Expired';
+                } elseif ($selisih >= 30 && $selisih <= 90) {
+                    $statusNotifikasi = 'Warning';
+                } else {
+                    $statusNotifikasi = 'Active';
+                }
+            }
+
             return [
                 'monitoring_id'              => $item->monitoring_id,
                 'apd_id'                     => $item->apd_id,
@@ -66,12 +103,11 @@ class MonitoringApdController extends Controller
                 'gardu_induk_id'             => $item->gardu_induk_id,
                 'gardu_nama'                 => optional($item->garduInduk)->nama_gardu_induk ?? '-',
                 'stok'                       => $item->stok,
-                'tanggal_distribusi'         => $item->tanggal_distribusi,
-                'tanggal_pemeriksaan'        => $item->tanggal_pemeriksaan,
-                'tanggal_berakhir'           => $item->tanggal_berakhir,
+                'tanggal_distribusi'         => optional($item->tanggal_distribusi)->format('Y-m-d') ?? '-',
+                'tanggal_pemeriksaan'        => optional($item->tanggal_pemeriksaan)->format('Y-m-d') ?? '-',
+                'tanggal_berakhir'           => optional($item->tanggal_berakhir)->format('Y-m-d') ?? '-',
                 'kondisi'                    => $item->kondisi,
-                'status_notifikasi'          => $item->status_notifikasi,
-                'status_notifikasi_otomatis' => $item->status_notifikasi_otomatis,
+                'status_notifikasi_otomatis' => $statusNotifikasi, // ✅ Dinamis
                 'catatan'                    => $item->catatan,
             ];
         })->appends($request->all());
@@ -169,7 +205,6 @@ class MonitoringApdController extends Controller
                 'tanggal_pemeriksaan'        => $monitoring->tanggal_pemeriksaan,
                 'tanggal_berakhir'           => $monitoring->tanggal_berakhir,
                 'kondisi'                    => $monitoring->kondisi,
-                'status_notifikasi'          => $monitoring->status_notifikasi,
                 'status_notifikasi_otomatis' => $monitoring->status_notifikasi_otomatis,
                 'catatan'                    => $monitoring->catatan,
                 'created_at'                 => $monitoring->created_at,
@@ -209,19 +244,15 @@ class MonitoringApdController extends Controller
             $errors   = $import->getErrorRows();
             $totalProcessed = $imported + $updated;
 
-            // Pesan sukses utama
             $message = "Import selesai. Berhasil diproses: **{$totalProcessed} data** (Ditambahkan: {$imported}, Diperbarui: {$updated}).";
             
             if ($skipped > 0) {
-                // Menambahkan informasi baris yang diskip (kosong/gagal validasi)
                 $message .= " Ditemukan **{$skipped} baris** yang dilewati karena gagal validasi atau kosong.";
             }
 
             $flashData = [
                 'success' => $message,
-                // Mengirim array error rows ke frontend
                 'importErrors' => empty($errors) ? [] : $errors,
-                // Menambahkan hitungan error agar komponen React tahu ada pesan peringatan
                 'errorCount' => count($errors)
             ];
 
@@ -245,19 +276,15 @@ class MonitoringApdController extends Controller
         $filename = 'template_monitoring_apd.xlsx';
         $path = storage_path('app/public/' . $filename);
 
-        // Data untuk dropdown helper
         $apds = Apd::select('id', 'nama_apd', 'kode_apd')->get();
         $lokasis = Lokasi::select('lokasi_id', 'nama_lokasi')->get();
         $gardus = GarduInduk::select('gardu_induk_id', 'nama_gardu_induk')->get();
 
         $spreadsheet = new Spreadsheet();
         
-        // Sheet 1: Template Input
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Template Import');
         
-        // 1. Header Kolom
-        // ==========================
         $headers = [
             'Nama APD',
             'Lokasi',
@@ -272,7 +299,6 @@ class MonitoringApdController extends Controller
         
         $sheet->fromArray([$headers], null, 'A1');
         
-        // Styling header... (tetap sama)
         $headerStyle = [
             'font' => [
                 'bold' => true,
@@ -297,7 +323,6 @@ class MonitoringApdController extends Controller
         
         $sheet->getStyle('A1:I1')->applyFromArray($headerStyle);
         
-        // Set column widths... (tetap sama)
         $sheet->getColumnDimension('A')->setWidth(35);
         $sheet->getColumnDimension('B')->setWidth(20);
         $sheet->getColumnDimension('C')->setWidth(25);
@@ -308,8 +333,6 @@ class MonitoringApdController extends Controller
         $sheet->getColumnDimension('H')->setWidth(15);
         $sheet->getColumnDimension('I')->setWidth(30);
         
-        // 2. Contoh Data (Baris 2) - BISA LANGSUNG DIISI/DI-IMPORT
-        // ==========================
         $exampleData = [
             'Helm Safety Warna Putih (Manajemen, Engineer, dan Visitor)',
             'ULTG Malang',
@@ -323,19 +346,13 @@ class MonitoringApdController extends Controller
         ];
         
         $sheet->fromArray([$exampleData], null, 'A2');
-        
-        // Freeze pane
         $sheet->freezePane('A2');
 
-        // 3. Keterangan/Panduan di Sheet Template Import
-        // ===============================================
-        $keteranganRow = 20; // <--- BARIS KETERANGAN DIMULAI JAUH LEBIH BAWAH (BARIS 20)
-
-        // Judul Keterangan
+        $keteranganRow = 20;
         $sheet->setCellValue('A' . $keteranganRow, 'KETENTUAN PENGISIAN DATA:');
         $sheet->mergeCells('A' . $keteranganRow . ':I' . $keteranganRow);
         $sheet->getStyle('A' . $keteranganRow)->getFont()->setBold(true);
-        $keteranganRow++; // Naik 1 baris
+        $keteranganRow++;
         
         $keterangan = [
             'Nama APD: Wajib diisi. Harus PERSIS sesuai dengan data di sheet "Ref - APD".',
@@ -353,26 +370,19 @@ class MonitoringApdController extends Controller
 
         foreach ($keterangan as $k) {
             if (!empty($k)) {
-                
-                // Styling khusus untuk sub-judul 'PENCEGAHAN DUPLIKASI'
                 if (strpos($k, ':') !== false && !str_starts_with(trim($k), 'Nama APD') && !str_starts_with(trim($k), 'Lokasi') && !str_starts_with(trim($k), 'Gardu Induk') && !str_starts_with(trim($k), 'Stok') && !str_starts_with(trim($k), 'Tanggal Distribusi') && !str_starts_with(trim($k), 'Kondisi') && !str_starts_with(trim($k), 'Catatan')) {
-                    $sheet->setCellValue('A' . $keteranganRow, $k); // Tanpa bullet
+                    $sheet->setCellValue('A' . $keteranganRow, $k);
                     $sheet->getStyle('A' . $keteranganRow)->getFont()->setBold(true)->setSize(11)->getColor()->setRGB('4472C4');
                 } else {
                     $sheet->setCellValue('A' . $keteranganRow, '• ' . $k);
                     $sheet->getStyle('A' . $keteranganRow)->getFont()->setSize(10);
                 }
-
             }
             $sheet->mergeCells('A' . $keteranganRow . ':I' . $keteranganRow);
             $sheet->getStyle('A' . $keteranganRow)->getAlignment()->setWrapText(true);
             $keteranganRow++;
         }
-        
-        // 4. Sheet Referensi 
-        // ===============================================
 
-        // Sheet 2: Referensi APD
         $sheetApd = $spreadsheet->createSheet();
         $sheetApd->setTitle('Ref - APD');
         $sheetApd->setCellValue('A1', 'Kode APD');
@@ -388,7 +398,6 @@ class MonitoringApdController extends Controller
         $sheetApd->getColumnDimension('A')->setWidth(20);
         $sheetApd->getColumnDimension('B')->setWidth(50);
         
-        // Sheet 3: Referensi Lokasi
         $sheetLokasi = $spreadsheet->createSheet();
         $sheetLokasi->setTitle('Ref - Lokasi');
         $sheetLokasi->setCellValue('A1', 'Daftar Lokasi');
@@ -401,7 +410,6 @@ class MonitoringApdController extends Controller
         }
         $sheetLokasi->getColumnDimension('A')->setWidth(25);
         
-        // Sheet 4: Referensi Gardu Induk
         $sheetGardu = $spreadsheet->createSheet();
         $sheetGardu->setTitle('Ref - Gardu Induk');
         $sheetGardu->setCellValue('A1', 'Daftar Gardu Induk');
@@ -414,10 +422,8 @@ class MonitoringApdController extends Controller
         }
         $sheetGardu->getColumnDimension('A')->setWidth(30);
 
-        // Set active sheet kembali ke template
         $spreadsheet->setActiveSheetIndex(0);
         
-        // Save file
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
         $writer->save($path);
 

@@ -14,23 +14,26 @@ export default function GuestLayout({ children, welcomeContent }) {
                     backgroundRepeat: 'no-repeat, repeat',
                     backgroundPosition: 'center, 100% 0'
                 }}>
-
-                    <a href="/" className="mb-8">
+                    
+<a href="/" className="mb-10 group block">
                         <div className="flex items-center justify-center relative">
-                            {/* Efek lingkaran glow - DIKURANGI DAN DISERDAHANAKAN */}
-                            {/* Hanya mempertahankan satu efek glow subtle di belakang logo */}
+                            {/* Gradient ring luar untuk depth */}
                             <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="h-28 w-28 rounded-full bg-white/40 blur-2xl"></div>
+                                <div className="h-28 w-28 rounded-full bg-gradient-to-br from-lime-300/25 to-cyan-200/15 transition-all duration-500 group-hover:from-lime-300/35 group-hover:to-cyan-200/25 group-hover:scale-110"></div>
                             </div>
                             
-                            {/* Logo HSSE PLN */}
+                            {/* White circle background - lebih kecil dan proporsional */}
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="h-24 w-24 rounded-full bg-white shadow-md transition-all duration-500 group-hover:shadow-lg group-hover:scale-105"></div>
+                            </div>
+                            
+                            {/* Logo HSSE PLN - ukuran disesuaikan */}
                             <img 
                                 src="/img/hsse.png" 
                                 alt="HSSE PLN Logo" 
-                                className="h-24 w-auto relative z-10"
+                                className="h-16 w-auto relative z-10 transition-all duration-300 group-hover:scale-105"
                                 style={{
-                                    // Filter disesuaikan agar lebih fokus, shadow diperkuat
-                                    filter: 'brightness(1.0) drop-shadow(0 0 12px rgba(255,255,255,0.7)) drop-shadow(0 4px 16px rgba(0,0,0,0.4))'
+                                    filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.1))'
                                 }}
                             />
                         </div>

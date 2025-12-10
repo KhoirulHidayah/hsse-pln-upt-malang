@@ -10,18 +10,22 @@ class ApdSeeder extends Seeder
     public function run(): void
     {
         DB::table('apds')->insert([
-            // 🪖 HELM (Safety Helmet) – sesuai SPLN U2.006:2023 Lampiran Tabel Warna Helm
+
+            // ============================================================
+            // 🟦 HELM SAFETY (SPLN U2.006:2023)
+            // ============================================================
+
             [
                 'jenis_id'        => 1,
-                'nama_apd'        => 'Helm Safety Warna Putih (Manajemen, Engineer, dan Visitor)',
+                'nama_apd'        => 'Helm Safety Putih (Manajemen, Engineer, Visitor)',
                 'kode_apd'        => 'APD-001-PTH',
-                'deskripsi'       => 'Melindungi kepala dari benturan benda jatuh dan kontak listrik bagi personel manajemen, engineer, dan tamu.',
+                'deskripsi'       => 'Helm standar SPLN digunakan oleh manajemen, engineer dan visitor. Melindungi kepala dari benturan dan kontak listrik hingga 20 kV. Dilengkapi suspensi 6 titik dan chin strap.',
                 'gambar'          => 'apd/helm_putih.png',
-                'bahan'           => 'ABS (Acrylonitrile Butadiene Styrene)',
-                'warna'           => 'Putih (RAL 9010)',
+                'bahan'           => 'ABS',
+                'warna'           => 'Putih',
                 'ukuran'          => 'Universal (Adjustable)',
-                'kemampuan'       => 'Tahan benturan vertikal dan arus listrik hingga 20.000 Volt.',
-                'fungsi'          => 'Dilengkapi suspensi 6 titik dan chin strap. Warna putih digunakan untuk manajemen, engineer, dan visitor.',
+                'kemampuan'       => 'Tahan benturan vertikal dan listrik hingga 20 kV',
+                'fungsi'          => 'Identifikasi personel manajemen, engineer, dan pengunjung',
                 'standar'         => 'SPLN U2.006:2023; EN 397; ANSI Z89.1',
                 'masa_penggunaan' => '4 tahun',
                 'created_by'      => 1,
@@ -29,17 +33,18 @@ class ApdSeeder extends Seeder
                 'created_at'      => now(),
                 'updated_at'      => now(),
             ],
+
             [
                 'jenis_id'        => 1,
-                'nama_apd'        => 'Helm Safety Warna Merah (Pengawas K3 dan Pekerjaan)',
+                'nama_apd'        => 'Helm Safety Merah (Pengawas K3 / Pekerjaan)',
                 'kode_apd'        => 'APD-001-MRH',
-                'deskripsi'       => 'Digunakan oleh pengawas K3, pengawas pekerjaan, dan pengawas manuver untuk identifikasi mudah di lapangan.',
+                'deskripsi'       => 'Helm merah untuk pengawas K3 dan pengawas pekerjaan. Memudahkan identifikasi di lapangan dan tahan panas serta benturan berat.',
                 'gambar'          => 'apd/helm_merah.png',
-                'bahan'           => 'ABS (Acrylonitrile Butadiene Styrene)',
-                'warna'           => 'Merah (RAL 3000)',
+                'bahan'           => 'ABS',
+                'warna'           => 'Merah',
                 'ukuran'          => 'Universal (Adjustable)',
-                'kemampuan'       => 'Tahan panas dan benturan berat pada area kerja industri.',
-                'fungsi'          => 'Helm merah sebagai tanda tanggung jawab pengawasan dan keselamatan kerja.',
+                'kemampuan'       => 'Tahan panas dan benturan berat',
+                'fungsi'          => 'Identifikasi pengawas K3 dan pengawas pekerjaan',
                 'standar'         => 'SPLN U2.006:2023; EN 397; ANSI Z89.1',
                 'masa_penggunaan' => '4 tahun',
                 'created_by'      => 1,
@@ -47,17 +52,18 @@ class ApdSeeder extends Seeder
                 'created_at'      => now(),
                 'updated_at'      => now(),
             ],
+
             [
                 'jenis_id'        => 1,
-                'nama_apd'        => 'Helm Safety Warna Biru (Pelaksana Pekerjaan)',
+                'nama_apd'        => 'Helm Safety Biru (Pelaksana Pekerjaan)',
                 'kode_apd'        => 'APD-001-BIR',
-                'deskripsi'       => 'Digunakan oleh pelaksana pekerjaan di area proyek dan lapangan.',
+                'deskripsi'       => 'Helm biru untuk pelaksana pekerjaan di lapangan. Tahan benturan dan suhu tinggi, sesuai standar SPLN.',
                 'gambar'          => 'apd/helm_biru.png',
-                'bahan'           => 'HDPE (High Density Polyethylene)',
-                'warna'           => 'Biru (RAL 5002)',
+                'bahan'           => 'HDPE',
+                'warna'           => 'Biru',
                 'ukuran'          => 'Universal (Adjustable)',
-                'kemampuan'       => 'Tahan benturan dan suhu kerja tinggi.',
-                'fungsi'          => 'Warna biru digunakan oleh personel pelaksana utama pekerjaan sesuai SPLN.',
+                'kemampuan'       => 'Tahan benturan dan suhu tinggi',
+                'fungsi'          => 'Identifikasi pelaksana pekerjaan',
                 'standar'         => 'SPLN U2.006:2023; EN 397; ANSI Z89.1',
                 'masa_penggunaan' => '4 tahun',
                 'created_by'      => 1,
@@ -65,17 +71,18 @@ class ApdSeeder extends Seeder
                 'created_at'      => now(),
                 'updated_at'      => now(),
             ],
+
             [
                 'jenis_id'        => 1,
-                'nama_apd'        => 'Helm Safety Warna Kuning (Mitra Kerja dan Magang)',
+                'nama_apd'        => 'Helm Safety Kuning (Mitra Kerja & Magang)',
                 'kode_apd'        => 'APD-001-KNG',
-                'deskripsi'       => 'Dikenakan oleh mitra kerja (kontraktor) dan peserta magang sesuai pedoman SPLN.',
+                'deskripsi'       => 'Helm kuning dipakai oleh kontraktor, pekerja eksternal, dan peserta magang. Tahan benturan ringan dan panas sedang.',
                 'gambar'          => 'apd/helm_kuning.png',
-                'bahan'           => 'HDPE (High Density Polyethylene)',
-                'warna'           => 'Kuning (RAL 1026)',
+                'bahan'           => 'HDPE',
+                'warna'           => 'Kuning',
                 'ukuran'          => 'Universal (Adjustable)',
-                'kemampuan'       => 'Melindungi kepala dari kejatuhan benda ringan dan panas sedang.',
-                'fungsi'          => 'Warna kuning menandakan pekerja eksternal atau magang di lokasi kerja PLN.',
+                'kemampuan'       => 'Tahan benturan ringan',
+                'fungsi'          => 'Identifikasi mitra kerja / kontraktor',
                 'standar'         => 'SPLN U2.006:2023; EN 397; ANSI Z89.1',
                 'masa_penggunaan' => '4 tahun',
                 'created_by'      => 1,
@@ -84,38 +91,22 @@ class ApdSeeder extends Seeder
                 'updated_at'      => now(),
             ],
 
-            // 👓 KACAMATA PENGAMAN
-            [
-                'jenis_id'        => 2,
-                'nama_apd'        => 'Kacamata Pengaman (Safety Glasses)',
-                'kode_apd'        => 'APD-002',
-                'deskripsi'       => 'Melindungi mata dari debu, partikel, dan percikan bahan kimia.',
-                'gambar'          => 'apd/kacamata_default.png',
-                'bahan'           => 'Polycarbonate',
-                'warna'           => 'Transparan',
-                'ukuran'          => 'Universal',
-                'kemampuan'       => 'Anti gores, anti fog, dan UV protection.',
-                'fungsi'          => 'Melindungi mata dari percikan, debu, dan radiasi UV.',
-                'standar'         => 'ANSI Z87.1',
-                'masa_penggunaan' => '2 tahun',
-                'created_by'      => 1,
-                'updated_by'      => 1,
-                'created_at'      => now(),
-                'updated_at'      => now(),
-            ],
 
-            // 👢 SAFETY SHOES – masa penggunaan 2 tahun
+            // ============================================================
+            // 🟦 SEPATU SAFETY (SPLN)
+            // ============================================================
+
             [
                 'jenis_id'        => 6,
                 'nama_apd'        => 'Sepatu Safety S3 SRC (Anti Slip & Anti Tusuk)',
                 'kode_apd'        => 'APD-003-S3',
-                'deskripsi'       => 'Melindungi kaki dari benda berat, tusukan, dan lantai licin di area kerja.',
+                'deskripsi'       => 'Sepatu safety S3 untuk area kerja industri. Anti slip, anti tusuk, dan tahan benturan 200 joule.',
                 'gambar'          => 'apd/safety_shoes_s3.png',
-                'bahan'           => 'Kulit Full Grain + Sol PU/TPU',
+                'bahan'           => 'Kulit + PU/TPU',
                 'warna'           => 'Hitam',
                 'ukuran'          => '39–45',
-                'kemampuan'       => 'Tahan benturan 200 Joule, anti tusuk, anti slip, dan tahan minyak.',
-                'fungsi'          => 'Dilengkapi steel toe cap dan insole anti static (ESD protection).',
+                'kemampuan'       => 'Toe cap 200J, anti slip, anti tusuk',
+                'fungsi'          => 'Melindungi kaki dari bahaya mekanis',
                 'standar'         => 'EN ISO 20345; SPLN U2.006:2023',
                 'masa_penggunaan' => '2 tahun',
                 'created_by'      => 1,
@@ -123,17 +114,18 @@ class ApdSeeder extends Seeder
                 'created_at'      => now(),
                 'updated_at'      => now(),
             ],
+
             [
                 'jenis_id'        => 6,
                 'nama_apd'        => 'Sepatu Safety Dielectric (Tahan Listrik)',
                 'kode_apd'        => 'APD-003-DLC',
-                'deskripsi'       => 'Untuk pekerjaan listrik bertegangan tinggi (live line).',
+                'deskripsi'       => 'Sepatu dielectric untuk pekerjaan bertegangan tinggi. Tidak mengandung logam dan tahan listrik hingga 18 kV.',
                 'gambar'          => 'apd/safety_shoes_dielectric.png',
-                'bahan'           => 'Karet isolasi (Rubber Insulating)',
+                'bahan'           => 'Rubber Insulating',
                 'warna'           => 'Kuning',
                 'ukuran'          => '39–44',
-                'kemampuan'       => 'Tahan arus listrik hingga 18.000 Volt, anti slip, dan tahan minyak.',
-                'fungsi'          => 'Tanpa logam, ringan, dan mudah dibersihkan.',
+                'kemampuan'       => 'Tahan listrik 18.000 Volt',
+                'fungsi'          => 'Perlindungan kaki dari listrik',
                 'standar'         => 'EN ISO 20345; SPLN U2.006:2023',
                 'masa_penggunaan' => '2 tahun',
                 'created_by'      => 1,
@@ -142,37 +134,53 @@ class ApdSeeder extends Seeder
                 'updated_at'      => now(),
             ],
 
-            // 🧗 FULL BODY HARNESS – masa penggunaan 10 tahun
+
+            // ============================================================
+            // 🟦 FULL BODY HARNESS (SPLN U2.006:2023)
+            // ============================================================
+
             [
                 'jenis_id'        => 8,
-                'nama_apd'        => 'Full Body Harness 5 Titik (Pekerjaan di Ketinggian)',
-                'kode_apd'        => 'APD-004-5T',
-                'deskripsi'       => 'Menahan tubuh agar tidak jatuh saat bekerja di tower, tiang, atau gardu.',
-                'gambar'          => 'apd/full_body_harness_5titik.png',
-                'bahan'           => 'Polyester Webbing + D-Ring Alloy Steel',
+                'nama_apd'        => 'Full Body Harness (Standar SPLN U2.006:2023)',
+                'kode_apd'        => 'APD-004-FBH',
+                'deskripsi'       => 'Full Body Harness (FBH) berfungsi mencegah pekerja jatuh dengan menjaga posisi kerja, membatasi pergerakan, dan menahan energi jatuh agar pekerja tidak membentur dasar. Wajib digunakan pada seluruh pekerjaan di ketinggian sesuai SPLN U2.006:2023 dan Permenaker No. 8 Tahun 2010. FBH terdiri dari shoulder straps, restrainer, buckles, thigh straps, fall arrest attachment, dan sub pelvic strap. Dilengkapi lanyard sebagai konektor antara body harness dan anchor.',
+                'gambar'          => 'apd/harness_default.png',
+
+                // BAHAN (sesuai tabel 20 SPLN)
+                'bahan'           => 'Polyester webbing; metal stainless steel; reinforced plastic; nylon; lanyard polyester + stainless steel hook + shock absorber polyester/metal/rubber',
+
                 'warna'           => 'Kuning & Hitam',
                 'ukuran'          => 'All Size (Adjustable)',
-                'kemampuan'       => 'Menahan beban hingga 140 kg; gaya jatuh maksimum 6 kN.',
-                'fungsi'          => 'Dilengkapi dorsal, sternal, dan side D-rings serta lanyard absorber.',
-                'standar'         => 'ANSI Z359.11; EN 361',
+
+                // KEMAMPUAN MEKANIS
+                'kemampuan'       => 'Safety Working Load (SWL) hingga 140 kg; fall arrest force < 6 kN; tahan beban jatuh vertikal.',
+
+                // FUNGSI & APLIKASI (berdasarkan 6 kelas ANSI Z359.11)
+                'fungsi'          => 'Personal fall arrest, controlled descent, rescue, ladder climbing, work positioning, restraint system.',
+
+                'standar'         => 'SPLN U2.006:2023; ANSI Z359.11; CSA Z259.10; EN 361',
+
+                // MASA PENGGUNAAN
                 'masa_penggunaan' => '10 tahun',
+
                 'created_by'      => 1,
                 'updated_by'      => 1,
                 'created_at'      => now(),
                 'updated_at'      => now(),
             ],
+
             [
                 'jenis_id'        => 8,
-                'nama_apd'        => 'Full Body Harness Double Lanyard Shock Absorber',
-                'kode_apd'        => 'APD-004-DLY',
-                'deskripsi'       => 'Menahan dan meredam energi jatuh bebas agar aman bagi pekerja.',
-                'gambar'          => 'apd/harness_double_lanyard.png',
-                'bahan'           => 'Polyamide Webbing + Hook Steel + Energy Absorber',
-                'warna'           => 'Kuning',
+                'nama_apd'        => 'Full Body Harness 5 Titik (Sesuai SPLN)',
+                'kode_apd'        => 'APD-004-5T',
+                'deskripsi'       => 'Full Body Harness (FBH) berfungsi mencegah pekerja jatuh, menjaga posisi kerja, dan menahan energi jatuh agar tidak melebihi 6 kN. Komponen: shoulder straps, restrainer, buckles, thigh straps, dorsal/side D-ring, sub pelvic strap. Digunakan pada sistem fall arrest, work positioning, rescue, controlled descent, ladder climbing, dan restraint.',
+                'gambar'          => 'apd/full_body_harness_5titik.png',
+                'bahan'           => 'Polyester webbing; alloy steel/stainless steel D-ring; metal buckles; reinforced plastic; lanyard polyester + metal + rubber shock absorber.',
+                'warna'           => 'Kuning & Hitam',
                 'ukuran'          => 'All Size (Adjustable)',
-                'kemampuan'       => 'Mengurangi gaya jatuh hingga <6 kN; panjang total 2 meter.',
-                'fungsi'          => 'Lanyard dilengkapi shock absorber dan dua pengait karabiner galvanis.',
-                'standar'         => 'ANSI Z359.11; EN 361',
+                'kemampuan'       => 'SWL hingga 140 kg; fall arrest force < 6 kN; dilengkapi shock absorber.',
+                'fungsi'          => 'Fall arrest, rescue, work positioning, controlled descent, restraint.',
+                'standar'         => 'SPLN U2.006:2023; ANSI Z359.11; EN 361',
                 'masa_penggunaan' => '10 tahun',
                 'created_by'      => 1,
                 'updated_by'      => 1,
@@ -180,25 +188,25 @@ class ApdSeeder extends Seeder
                 'updated_at'      => now(),
             ],
 
-            // 🦺 LIFE JACKET
             [
-                'jenis_id'        => 9,
-                'nama_apd'        => 'Life Jacket',
-                'kode_apd'        => 'APD-005',
-                'deskripsi'       => 'Pelampung keselamatan sesuai standar ISO 12402-5:2020.',
-                'gambar'          => 'apd/lifejacket_default.png',
-                'bahan'           => 'Nylon + Foam PE',
-                'warna'           => 'Orange',
+                'jenis_id'        => 8,
+                'nama_apd'        => 'Full Body Harness Double Lanyard Shock Absorber (Sesuai SPLN)',
+                'kode_apd'        => 'APD-004-DLY',
+                'deskripsi'       => 'Double lanyard dengan shock absorber untuk perpindahan titik anchor yang aman. Shock absorber meredam gaya jatuh agar tidak melebihi 6 kN. FBH wajib digunakan untuk pekerjaan ketinggian.',
+                'gambar'          => 'apd/harness_double_lanyard.png',
+                'bahan'           => 'Lanyard polyester; hook stainless steel; shock absorber polyester/metal/rubber; webbing polyester + alloy steel ring.',
+                'warna'           => 'Kuning',
                 'ukuran'          => 'All Size (Adjustable)',
-                'kemampuan'       => 'Daya apung minimal 50 Newton.',
-                'fungsi'          => 'Melindungi pekerja dari tenggelam saat bekerja di area air.',
-                'standar'         => 'ISO 12402-5:2020',
-                'masa_penggunaan' => '5 tahun',
+                'kemampuan'       => 'Fall arrest force < 6 kN; panjang 2m; SWL 140 kg.',
+                'fungsi'          => 'Fall arrest, moving anchor point, work positioning, ladder climbing, restraint.',
+                'standar'         => 'SPLN U2.006:2023; ANSI Z359.11; EN 361',
+                'masa_penggunaan' => '10 tahun',
                 'created_by'      => 1,
                 'updated_by'      => 1,
                 'created_at'      => now(),
                 'updated_at'      => now(),
             ],
+
         ]);
     }
 }

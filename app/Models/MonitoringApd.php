@@ -23,12 +23,23 @@ class MonitoringApd extends Model
         'tanggal_pemeriksaan',
         'tanggal_berakhir',
         'kondisi',
-        'status_notifikasi',
         'catatan',
+        'is_read',
     ];
 
     /**
-     * 🔗 Relasi ke tabel APD utama.
+     * Cast atribut ke tipe data yang sesuai
+     */
+    protected $casts = [
+        'tanggal_distribusi' => 'date',
+        'tanggal_pemeriksaan' => 'date',
+        'tanggal_berakhir' => 'date',
+        'is_read' => 'boolean',
+        'stok' => 'integer',
+    ];
+
+    /**
+     * 🔗 Relasi ke tabel APD utama
      */
     public function apd()
     {
@@ -36,7 +47,7 @@ class MonitoringApd extends Model
     }
 
     /**
-     * 🔗 Relasi ke pengguna (pegawai/pemakai APD).
+     * 🔗 Relasi ke pengguna (pegawai/pemakai APD)
      */
     public function user()
     {
@@ -44,7 +55,7 @@ class MonitoringApd extends Model
     }
 
     /**
-     * 🔗 Relasi ke lokasi (contoh: ULTG Krian).
+     * 🔗 Relasi ke lokasi
      */
     public function lokasi()
     {
@@ -52,7 +63,7 @@ class MonitoringApd extends Model
     }
 
     /**
-     * 🔗 Relasi ke gardu induk.
+     * 🔗 Relasi ke gardu induk
      */
     public function garduInduk()
     {
@@ -60,35 +71,35 @@ class MonitoringApd extends Model
     }
 
     /**
-     * 🧮 Atribut tambahan: status notifikasi otomatis berdasarkan tanggal berakhir.
-     * Ini akan menghitung ulang status secara dinamis.
+     * 🧮 Atribut tambahan yang akan di-append ke model
      */
-    protected $appends = ['status_notifikasi_otomatis'];
+    protected $appends = ['status_notifikasi_otomatis', 'status_color'];
 
+    /**
+     * 🧮 Kalkulasi status notifikasi otomatis berdasarkan tanggal berakhir
+     * ✅ PERBAIKAN: Sesuai dengan aturan baru
+     * - < 30 hari = Expired (Merah)
+     * - 30-90 hari = Warning (Kuning)
+     * - > 90 hari = Active (Hijau)
+     */
     public function getStatusNotifikasiOtomatisAttribute()
     {
         if (!$this->tanggal_berakhir) {
             return 'Expired';
         }
 
-        $selisih = Carbon::now()->diffInDays(Carbon::parse($this->tanggal_berakhir), false);
+        $today = Carbon::now()->startOfDay();
+        $expiry = Carbon::parse($this->tanggal_berakhir)->startOfDay();
+        $daysLeft = (int) $today->diffInDays($expiry, false);
 
-        // Jika selisih negatif, artinya sudah lewat masa berlaku
-        if ($selisih < 0) {
+        // ✅ PERBAIKAN: Logika baru
+        if ($daysLeft < 30) {
             return 'Expired';
-        }
-
-        // Jika masa berlaku > 3 bulan (90 hari)
-        if ($selisih > 90) {
+        } elseif ($daysLeft >= 30 && $daysLeft <= 90) {
+            return 'Warning';
+        } else {
             return 'Active';
         }
-        
-        // Jika masa berlaku 0-3 bulan
-        if ($selisih >= 0 && $selisih <= 90) {
-            return 'Warning';
-        }
-
-        return 'Expired';
     }
 
     /**
@@ -96,7 +107,7 @@ class MonitoringApd extends Model
      */
     public function getStatusColorAttribute()
     {
-        $status = $this->status_notifikasi ?? $this->status_notifikasi_otomatis;
+        $status = $this->status_notifikasi_otomatis;
         
         return match($status) {
             'Active' => 'success',
@@ -107,46 +118,25 @@ class MonitoringApd extends Model
     }
 
     /**
-     * 📅 Auto-update status_notifikasi sebelum save
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::saving(function ($model) {
-            // Auto-set status_notifikasi berdasarkan tanggal_berakhir
-            if ($model->tanggal_berakhir) {
-                $selisih = Carbon::now()->diffInDays(Carbon::parse($model->tanggal_berakhir), false);
-                
-                if ($selisih < 0) {
-                    $model->status_notifikasi = 'Expired';
-                } elseif ($selisih > 180) {
-                    $model->status_notifikasi = 'Active';
-                } else {
-                    $model->status_notifikasi = 'Warning';
-                }
-            } else {
-                $model->status_notifikasi = 'Expired';
-            }
-        });
-    }
-
-    /**
-     * 📊 Scope untuk filter berdasarkan status notifikasi
+     * 📊 Scope untuk filter berdasarkan status notifikasi DINAMIS
+     * ✅ PERBAIKAN: Menggunakan DATEDIFF untuk perhitungan real-time
      */
     public function scopeActive($query)
     {
-        return $query->where('status_notifikasi', 'Active');
+        return $query->whereNotNull('tanggal_berakhir')
+            ->whereRaw('DATEDIFF(tanggal_berakhir, CURDATE()) > 90');
     }
 
     public function scopeWarning($query)
     {
-        return $query->where('status_notifikasi', 'Warning');
+        return $query->whereNotNull('tanggal_berakhir')
+            ->whereRaw('DATEDIFF(tanggal_berakhir, CURDATE()) BETWEEN 30 AND 90');
     }
 
     public function scopeExpired($query)
     {
-        return $query->where('status_notifikasi', 'Expired');
+        return $query->whereNotNull('tanggal_berakhir')
+            ->whereRaw('DATEDIFF(tanggal_berakhir, CURDATE()) < 30');
     }
 
     /**
@@ -165,5 +155,37 @@ class MonitoringApd extends Model
     public function scopePerluDiganti($query)
     {
         return $query->where('kondisi', 'Perlu Diganti');
+    }
+
+    /**
+     * 📊 Scope untuk filter notifikasi yang belum dibaca
+     */
+    public function scopeUnread($query)
+    {
+        return $query->where('is_read', false);
+    }
+
+    /**
+     * 📊 Scope untuk filter notifikasi yang sudah dibaca
+     */
+    public function scopeRead($query)
+    {
+        return $query->where('is_read', true);
+    }
+
+    /**
+     * 🔔 Method untuk menandai notifikasi sebagai sudah dibaca
+     */
+    public function markAsRead()
+    {
+        $this->update(['is_read' => true]);
+    }
+
+    /**
+     * 🔔 Method untuk menandai notifikasi sebagai belum dibaca
+     */
+    public function markAsUnread()
+    {
+        $this->update(['is_read' => false]);
     }
 }

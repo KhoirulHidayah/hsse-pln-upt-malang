@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\GarduInduk;
 use App\Models\Lokasi;
+use App\Models\MonitoringApd;
 use App\Http\Requests\StoreGarduIndukRequest;
 use App\Http\Requests\UpdateGarduIndukRequest;
 use Illuminate\Http\Request;
@@ -11,7 +12,7 @@ use Illuminate\Http\Request;
 class GarduIndukController extends Controller
 {
     /**
-     * 🧾 Tampilkan daftar Gardu Induk (dapat difilter berdasarkan lokasi).
+     * 📋 Tampilkan daftar Gardu Induk (dapat difilter berdasarkan lokasi).
      */
     public function index(Request $request)
     {
@@ -28,22 +29,41 @@ class GarduIndukController extends Controller
             $query->where('lokasi_id', $request->lokasi_id);
         }
 
-        // 🔁 Sorting
+        // 🔀 Sorting
         $sortField = $request->get('sortField', 'gardu_induk_id');
         $sortDirection = $request->get('sortDirection', 'asc');
-        $query->orderBy($sortField, $sortDirection);
+        
+        if ($sortField !== 'monitoring_apd_count') {
+            $query->orderBy($sortField, $sortDirection);
+        }
 
         // 📄 Pagination + format data
         $garduInduks = $query->paginate(10)
             ->onEachSide(1)
             ->withQueryString()
-            ->through(fn($g) => [
-                'gardu_induk_id' => $g->gardu_induk_id,
-                'lokasi_nama'    => $g->lokasi?->nama_lokasi,
-                'nama_gardu_induk' => $g->nama_gardu_induk,
-                'created_at'     => optional($g->created_at)->format('Y-m-d'),
-                'updated_at'     => optional($g->updated_at)->format('Y-m-d'),
-            ]);
+            ->through(function($g) {
+                // Hitung jumlah monitoring APD untuk gardu induk ini
+                $monitoringCount = MonitoringApd::where('gardu_induk_id', $g->gardu_induk_id)->count();
+                
+                return [
+                    'gardu_induk_id' => $g->gardu_induk_id,
+                    'lokasi_id'      => $g->lokasi_id,
+                    'lokasi_nama'    => $g->lokasi?->nama_lokasi,
+                    'nama_gardu_induk' => $g->nama_gardu_induk,
+                    'monitoring_apd_count' => $monitoringCount,
+                    'created_at'     => optional($g->created_at)->format('Y-m-d'),
+                    'updated_at'     => optional($g->updated_at)->format('Y-m-d'),
+                ];
+            });
+
+        // 📊 Jika sorting berdasarkan monitoring_apd_count
+        if ($sortField === 'monitoring_apd_count') {
+            $sortedData = $garduInduks->getCollection()->sortBy(function ($gardu) {
+                return $gardu['monitoring_apd_count'];
+            }, SORT_REGULAR, $sortDirection === 'desc');
+            
+            $garduInduks->setCollection($sortedData->values());
+        }
 
         return inertia('GarduInduk/Index', [
             'garduInduks' => $garduInduks,
@@ -73,15 +93,20 @@ class GarduIndukController extends Controller
     }
 
     /**
-     * 🔍 Tampilkan detail Gardu Induk.
+     * 📄 Tampilkan detail Gardu Induk.
      */
     public function show(GarduInduk $garduInduk)
     {
+        // Hitung jumlah monitoring APD
+        $monitoringCount = MonitoringApd::where('gardu_induk_id', $garduInduk->gardu_induk_id)->count();
+
         return inertia('GarduInduk/Show', [
             'garduInduk' => [
                 'gardu_induk_id'   => $garduInduk->gardu_induk_id,
+                'lokasi_id'        => $garduInduk->lokasi_id,
                 'nama_gardu_induk' => $garduInduk->nama_gardu_induk,
                 'lokasi_nama'      => $garduInduk->lokasi?->nama_lokasi,
+                'monitoring_apd_count' => $monitoringCount,
                 'created_at'       => optional($garduInduk->created_at)->format('Y-m-d'),
                 'updated_at'       => optional($garduInduk->updated_at)->format('Y-m-d'),
             ],
