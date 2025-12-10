@@ -13,35 +13,43 @@ export default function VerifyEmail({ status }) {
 
     return (
         <GuestLayout>
-            <Head title="Email Verification" />
+            <Head title="Verifikasi Email" />
 
-            <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-                Thanks for signing up! Before getting started, could you verify
-                your email address by clicking on the link we just emailed to
-                you? If you didn't receive the email, we will gladly send you
-                another.
+            {/* Title Section */}
+            <div className="mb-6 text-center">
+                <h2 className="text-2xl font-bold text-gray-800">Verifikasi Alamat Email Anda</h2>
             </div>
 
+            {/* Deskripsi Instruksi */}
+            <div className="mb-6 text-sm text-gray-600 leading-relaxed">
+                Terima kasih telah mendaftar! Sebelum memulai, harap verifikasi alamat email Anda dengan mengeklik tautan yang baru saja kami kirimkan kepada Anda. Jika Anda tidak menerima email, kami akan dengan senang hati mengirimkannya kembali.
+            </div>
+
+            {/* Status Notifikasi */}
             {status === 'verification-link-sent' && (
-                <div className="mb-4 text-sm font-medium text-green-600 dark:text-green-400">
-                    A new verification link has been sent to the email address
-                    you provided during registration.
+                <div className="mb-4 rounded-lg bg-green-100 p-3 text-sm font-medium text-green-700">
+                    Tautan verifikasi baru telah dikirim ke alamat email yang Anda berikan saat pendaftaran.
                 </div>
             )}
 
             <form onSubmit={submit}>
                 <div className="mt-4 flex items-center justify-between">
-                    <PrimaryButton disabled={processing}>
-                        Resend Verification Email
+                    <PrimaryButton 
+                        // Styling tombol cyan gradient konsisten
+                        className="bg-gradient-to-r from-cyan-700 to-cyan-800 px-6 py-2.5 text-sm font-semibold hover:from-cyan-800 hover:to-cyan-900 focus:ring-cyan-700" 
+                        disabled={processing}
+                    >
+                        KIRIM ULANG EMAIL VERIFIKASI
                     </PrimaryButton>
 
                     <Link
                         href={route('logout')}
                         method="post"
                         as="button"
-                        className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
+                        // Styling link konsisten dengan tema cyan
+                        className="rounded-md text-sm text-cyan-600 underline hover:text-cyan-800 focus:outline-none focus:ring-2 focus:ring-cyan-600 focus:ring-offset-2"
                     >
-                        Log Out
+                        Keluar (Log Out)
                     </Link>
                 </div>
             </form>

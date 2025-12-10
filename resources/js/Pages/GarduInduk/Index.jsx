@@ -5,14 +5,15 @@ import Select from "@/Components/Select";
 import { Head, Link, router, usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/16/solid";
-import { MapPinned } from "lucide-react";
+// Menambahkan ikon untuk Aksi
+import { MapPinned, Plus, Pencil, Trash2 } from "lucide-react"; 
 
 export default function Index({ auth, garduInduks, lokasis, filters }) {
     const [search, setSearch] = useState(filters.search || "");
     const [lokasiFilter, setLokasiFilter] = useState(filters.lokasi_id || "");
     const { flash } = usePage().props;
 
-    // 🔁 Fungsi sorting kolom
+    // 🔍 Fungsi sorting kolom
     const sortChanged = (field) => {
         router.get(
             route("gardu-induk.index"),
@@ -41,23 +42,23 @@ export default function Index({ auth, garduInduks, lokasis, filters }) {
         return () => clearTimeout(delayDebounce);
     }, [search, lokasiFilter]);
 
-    // 🔽 Header kolom sortable
+    // 📽 Header kolom sortable
     const SortableHeader = ({ field, label }) => (
-        <th onClick={() => sortChanged(field)} className="px-3 py-2 cursor-pointer whitespace-nowrap">
+        <th onClick={() => sortChanged(field)} className="px-2 py-1.5 cursor-pointer whitespace-nowrap">
             <div className="flex items-center gap-1">
                 <span>{label}</span>
                 <div className="flex flex-col">
                     <ChevronUpIcon
                         className={`w-3 h-3 ${
                             filters.sortField === field && filters.sortDirection === "asc"
-                                ? "text-blue-500"
+                                ? "text-cyan-600"
                                 : ""
                         }`}
                     />
                     <ChevronDownIcon
                         className={`w-3 h-3 -mt-1 ${
                             filters.sortField === field && filters.sortDirection === "desc"
-                                ? "text-blue-500"
+                                ? "text-cyan-600"
                                 : ""
                         }`}
                     />
@@ -76,18 +77,18 @@ export default function Index({ auth, garduInduks, lokasis, filters }) {
         <AuthenticatedLayout
             user={auth.user}
             header={
-                <div className="flex items-start justify-between">
-                    {/* Header kiri */}
-                    <div className="flex items-start gap-4">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 dark:bg-gray-700">
-                            <MapPinned className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                <div className="flex items-center justify-between">
+                    {/* 🛡️ Header kiri */}
+                    <div className="flex items-center gap-2">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500 to-teal-600 shadow-md">
+                            <MapPinned className="h-5 w-5 text-white" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
+                            <h2 className="text-base font-semibold text-gray-800 dark:text-gray-200">
                                 Data Gardu Induk
                             </h2>
-                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                Daftar Gardu Induk beserta lokasi tempatnya.
+                            <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                                Kelola data gardu induk
                             </p>
                         </div>
                     </div>
@@ -95,11 +96,9 @@ export default function Index({ auth, garduInduks, lokasis, filters }) {
                     {/* ➕ Tombol Tambah */}
                     <Link
                         href={route("gardu-induk.create")}
-                        className="flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600"
+                        className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-cyan-600 to-teal-600 px-3 py-1.5 text-sm font-medium text-white shadow-md hover:from-cyan-700 hover:to-teal-700 transition-all"
                     >
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
+                        <Plus className="h-4 w-4" />
                         Tambah Gardu Induk
                     </Link>
                 </div>
@@ -107,24 +106,26 @@ export default function Index({ auth, garduInduks, lokasis, filters }) {
         >
             <Head title="Data Gardu Induk" />
 
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
+            <div className="py-2">
+                <div className="mx-auto max-w-7xl sm:px-2 lg:px-2">
                     {flash.success && (
-                        <div className="bg-emerald-500 py-2 px-4 text-white rounded mb-4">{flash.success}</div>
+                        <div className="bg-gradient-to-r from-emerald-500 to-green-500 py-2 px-3 text-white rounded-lg mb-2 shadow-md text-sm">
+                            {flash.success}
+                        </div>
                     )}
 
-                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
-                        <div className="p-6 text-gray-900 dark:text-gray-100">
+                    <div className="overflow-hidden bg-white shadow-md sm:rounded-lg dark:bg-gray-800">
+                        <div className="p-3 text-gray-900 dark:text-gray-100">
                             {/* 🔎 Filter */}
-                            <div className="flex flex-col md:flex-row gap-4 mb-4">
+                            <div className="mb-2 grid grid-cols-1 md:grid-cols-2 gap-2">
                                 <TextInput
-                                    className="w-full md:w-1/2"
+                                    className="w-full text-sm h-9"
                                     placeholder="Cari nama gardu induk..."
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                 />
                                 <Select
-                                    className="w-full md:w-1/2"
+                                    className="w-full text-sm h-9"
                                     value={lokasiFilter}
                                     onChange={(e) => setLokasiFilter(e.target.value)}
                                     placeholder="Semua Lokasi"
@@ -138,47 +139,55 @@ export default function Index({ auth, garduInduks, lokasis, filters }) {
                             {/* 📋 TABEL DESKTOP */}
                             <div className="hidden md:block">
                                 <div className="overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-lg">
-                                    <table className="min-w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                                        <thead className="text-xs uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 border-b-2 border-gray-500">
+                                    <table className="min-w-full text-sm text-gray-700 dark:text-gray-300">
+                                        <thead className="text-[11px] font-semibold uppercase bg-gradient-to-r from-cyan-50 to-teal-50 dark:from-gray-700 dark:to-gray-600 text-gray-700 dark:text-gray-200 border-b-2 border-cyan-200 dark:border-gray-600">
                                             <tr>
-                                                <th className="px-3 py-2 whitespace-nowrap">No</th>
+                                                <th className="px-2 py-1.5 text-center whitespace-nowrap w-10">No</th>
                                                 <SortableHeader field="nama_gardu_induk" label="Nama Gardu Induk" />
-                                                <th className="px-3 py-2 whitespace-nowrap">Lokasi</th>
-                                                {/* Kolom Tanggal Buat dan Tanggal Update dihapus */}
-                                                <th className="px-3 py-2 text-right whitespace-nowrap">Aksi</th>
+                                                <SortableHeader field="lokasi.nama_lokasi" label="Lokasi" />
+                                                {/* Mengubah lebar kolom Aksi */}
+                                                <th className="px-2 py-1.5 text-center whitespace-nowrap w-24">Aksi</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                                             {garduInduks.data.length > 0 ? (
                                                 garduInduks.data.map((gardu, index) => (
-                                                    <tr key={gardu.gardu_induk_id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                                        <td className="px-3 py-2 whitespace-nowrap">
+                                                    <tr key={gardu.gardu_induk_id} className="hover:bg-cyan-50 dark:hover:bg-gray-700/50 transition-colors">
+                                                        <td className="px-2 py-1.5 text-center text-gray-600 dark:text-gray-400 font-medium text-sm">
                                                             {(garduInduks.current_page - 1) * garduInduks.per_page + index + 1}
                                                         </td>
-                                                        <th className="px-3 py-2 text-gray-800 dark:text-gray-100 min-w-[200px] max-w-[250px]">
-                                                            <Link href={route("gardu-induk.show", gardu.gardu_induk_id)} className="hover:underline">
+                                                        <td className="px-2 py-1.5 font-semibold text-gray-800 dark:text-gray-100 text-sm">
+                                                            <Link 
+                                                                href={route("gardu-induk.show", gardu.gardu_induk_id)} 
+                                                                className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
+                                                            >
                                                                 {gardu.nama_gardu_induk}
                                                             </Link>
-                                                        </th>
+                                                        </td>
                                                         {/* Lokasi */}
-                                                        <td className="px-3 py-2 whitespace-nowrap">
+                                                        {/* Menghapus w-40 agar menyesuaikan konten */}
+                                                        <td className="px-2 py-1.5 text-gray-600 dark:text-gray-400 text-sm">
                                                             {gardu.lokasi_nama || "-"}
                                                         </td>
                                                         
-                                                        {/* AKSI - DIBUAT VERTIKAL DAN RINGKAS */}
-                                                        <td className="px-3 py-2 text-right whitespace-nowrap">
-                                                            <div className="flex flex-col items-end gap-1">
+                                                        {/* AKSI - HORIZONTAL DENGAN IKON */}
+                                                        <td className="px-2 py-1.5">
+                                                            <div className="flex items-center justify-center gap-1.5"> {/* Mengubah flex-col menjadi flex dan gap-0.5 menjadi gap-1.5 */}
                                                                 <Link
                                                                     href={route("gardu-induk.edit", gardu.gardu_induk_id)}
-                                                                    className="text-xs text-blue-600 dark:text-blue-500 hover:underline"
+                                                                    className="inline-flex items-center justify-center p-1.5 rounded-md text-cyan-600 dark:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-all group"
+                                                                    title="Edit Gardu Induk"
                                                                 >
-                                                                    Edit
+                                                                    <Pencil className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                                                                    {/* Menghapus teks "Edit" */}
                                                                 </Link>
                                                                 <button
                                                                     onClick={() => deleteGarduInduk(gardu)}
-                                                                    className="text-xs text-red-600 dark:text-red-500 hover:underline"
+                                                                    className="inline-flex items-center justify-center p-1.5 rounded-md text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all group"
+                                                                    title="Hapus Gardu Induk"
                                                                 >
-                                                                    Hapus
+                                                                    <Trash2 className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                                                                    {/* Menghapus teks "Hapus" */}
                                                                 </button>
                                                             </div>
                                                         </td>
@@ -186,9 +195,9 @@ export default function Index({ auth, garduInduks, lokasis, filters }) {
                                                 ))
                                             ) : (
                                                 <tr>
-                                                    {/* colSpan disesuaikan dari 6 menjadi 4 (No, Nama GI, Lokasi, Aksi) */}
-                                                    <td colSpan="4" className="px-3 py-4 text-center text-gray-400">
-                                                        Tidak ada data ditemukan.
+                                                    <td colSpan="4" className="px-4 py-8 text-center text-gray-400">
+                                                        <MapPinned className="h-12 w-12 mx-auto mb-2 opacity-30" />
+                                                        <p>Tidak ada data ditemukan</p>
                                                     </td>
                                                 </tr>
                                             )}
@@ -197,41 +206,41 @@ export default function Index({ auth, garduInduks, lokasis, filters }) {
                                 </div>
                             </div>
 
-                            {/* 📱 TABEL MOBILE (Gaya Card/List) */}
-                            <div className="md:hidden">
+                            {/* 📱 TABEL MOBILE */}
+                            <div className="md:hidden space-y-2">
                                 {garduInduks.data.length > 0 ? (
                                     garduInduks.data.map((gardu, index) => (
-                                        <div key={gardu.gardu_induk_id} className="border-b py-3 flex justify-between items-start">
-                                            {/* Data Kiri */}
-                                            <div className="flex-1 min-w-0 pr-4">
-                                                <div className="text-xs text-gray-400 dark:text-gray-500 mb-1">
-                                                     No. {(garduInduks.current_page - 1) * garduInduks.per_page + index + 1}
-                                                </div>
-                                                <Link
-                                                    href={route("gardu-induk.show", gardu.gardu_induk_id)}
-                                                    className="font-semibold text-gray-800 dark:text-gray-100 hover:underline block mb-1 truncate"
-                                                >
-                                                    {gardu.nama_gardu_induk}
-                                                </Link>
-                                                <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1 mt-1">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="font-medium text-gray-700 dark:text-gray-300">Lokasi:</span>
-                                                        <span className="truncate">{gardu.lokasi_nama || "-"}</span>
+                                        <div key={gardu.gardu_induk_id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 hover:shadow-md transition-shadow bg-white dark:bg-gray-800">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <div className="flex-1">
+                                                    <div className="text-xs text-gray-400 dark:text-gray-500 mb-1">
+                                                        No. {(garduInduks.current_page - 1) * garduInduks.per_page + index + 1}
+                                                    </div>
+                                                    <Link
+                                                        href={route("gardu-induk.show", gardu.gardu_induk_id)}
+                                                        className="font-semibold text-sm text-gray-800 dark:text-gray-100 hover:text-cyan-600 dark:hover:text-cyan-400 block mb-2"
+                                                    >
+                                                        {gardu.nama_gardu_induk}
+                                                    </Link>
+                                                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                                                        <span className="font-medium text-gray-700 dark:text-gray-300">Lokasi: </span>
+                                                        {gardu.lokasi_nama || "-"}
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            {/* Aksi Kanan (Vertikal) */}
-                                            <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                                            {/* Aksi (Mobile - Horizontal) */}
+                                            <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
                                                 <Link
                                                     href={route("gardu-induk.edit", gardu.gardu_induk_id)}
-                                                    className="text-xs font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                                                    className="text-xs font-medium text-cyan-600 dark:text-cyan-400 hover:text-cyan-800"
                                                 >
                                                     Edit
                                                 </Link>
+                                                <span className="text-gray-300 text-xs">|</span>
                                                 <button
                                                     onClick={() => deleteGarduInduk(gardu)}
-                                                    className="text-xs font-medium text-red-600 dark:text-red-500 hover:underline"
+                                                    className="text-xs font-medium text-red-600 dark:text-red-400 hover:text-red-800"
                                                 >
                                                     Hapus
                                                 </button>
@@ -239,11 +248,16 @@ export default function Index({ auth, garduInduks, lokasis, filters }) {
                                         </div>
                                     ))
                                 ) : (
-                                    <p className="py-4 text-center text-gray-400">Tidak ada data ditemukan.</p>
+                                    <div className="text-center py-8 text-gray-400">
+                                        <MapPinned className="h-12 w-12 mx-auto mb-2 opacity-30" />
+                                        <p>Tidak ada data ditemukan</p>
+                                    </div>
                                 )}
                             </div>
 
-                            <Pagination links={garduInduks.links} />
+                            <div className="mt-4">
+                                <Pagination links={garduInduks.links} />
+                            </div>
                         </div>
                     </div>
                 </div>

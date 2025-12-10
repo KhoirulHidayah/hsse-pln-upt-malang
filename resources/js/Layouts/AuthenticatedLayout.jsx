@@ -13,22 +13,50 @@ import {
     MapPinned,
     Bell,
     Package,
+    ChevronDown,
+    ChevronRight,
 } from 'lucide-react';
 
 export default function AuthenticatedLayout({ header, children }) {
     const user = usePage().props.auth.user;
-    const notificationCount = usePage().props.notificationCount || 0; // Ambil jumlah notifikasi dari props
+    const notificationCount = usePage().props.notificationCount || 0;
     
-    // Ambil state dari localStorage, default true jika belum ada
     const [sidebarOpen, setSidebarOpen] = useState(() => {
         const saved = localStorage.getItem('sidebarOpen');
         return saved !== null ? JSON.parse(saved) : true;
     });
 
-    // Simpan state ke localStorage setiap kali berubah
+    // State dropdown dengan localStorage
+    const [masterDataOpen, setMasterDataOpen] = useState(() => {
+        const saved = localStorage.getItem('masterDataOpen');
+        return saved !== null ? JSON.parse(saved) : false;
+    });
+    
+    const [monitoringOpen, setMonitoringOpen] = useState(() => {
+        const saved = localStorage.getItem('monitoringOpen');
+        return saved !== null ? JSON.parse(saved) : false;
+    });
+    
+    const [transaksiOpen, setTransaksiOpen] = useState(() => {
+        const saved = localStorage.getItem('transaksiOpen');
+        return saved !== null ? JSON.parse(saved) : false;
+    });
+
     useEffect(() => {
         localStorage.setItem('sidebarOpen', JSON.stringify(sidebarOpen));
     }, [sidebarOpen]);
+
+    useEffect(() => {
+        localStorage.setItem('masterDataOpen', JSON.stringify(masterDataOpen));
+    }, [masterDataOpen]);
+
+    useEffect(() => {
+        localStorage.setItem('monitoringOpen', JSON.stringify(monitoringOpen));
+    }, [monitoringOpen]);
+
+    useEffect(() => {
+        localStorage.setItem('transaksiOpen', JSON.stringify(transaksiOpen));
+    }, [transaksiOpen]);
 
     return (
         <div className="min-h-screen bg-gray-100">
@@ -36,16 +64,18 @@ export default function AuthenticatedLayout({ header, children }) {
             <aside
                 className={`${
                     sidebarOpen ? 'w-64' : 'w-20'
-                } fixed top-0 left-0 h-screen bg-gradient-to-b from-teal-600 to-teal-700 text-white shadow-lg transition-all duration-300 flex flex-col z-40`}
+                } fixed top-0 left-0 h-screen bg-gradient-to-b from-cyan-700 to-teal-800 text-white shadow-lg transition-all duration-300 flex flex-col z-40`}
             >
                 {/* Header Sidebar */}
-                <div className="flex items-center justify-center h-16 px-4 border-b border-teal-500/30">
+                <div className="flex items-center justify-center h-16 px-4 border-b border-cyan-600/30 bg-white/10">
                     <Link href="/" className="flex items-center space-x-3">
-                        <img
-                            src="/img/hsse_pln.png"
-                            alt="Logo UPT Malang"
-                            className="h-9 w-9 object-contain flex-shrink-0"
-                        />
+                        <div className="h-10 w-10 rounded-lg bg-white flex items-center justify-center p-1">
+                            <img
+                                src="/img/hsse_pln.png"
+                                alt="Logo UPT Malang"
+                                className="h-full w-full object-contain flex-shrink-0"
+                            />
+                        </div>
                         {sidebarOpen && (
                             <span className="text-lg font-semibold text-white tracking-wide whitespace-nowrap">
                                 UPT MALANG
@@ -55,8 +85,8 @@ export default function AuthenticatedLayout({ header, children }) {
                 </div>
 
                 {/* Menu Sidebar */}
-                <nav className="mt-5 flex-1 overflow-y-auto">
-                    <ul className="space-y-1 px-3">
+                <nav className="mt-3 flex-1 overflow-y-auto">
+                    <ul className="space-y-0.5">
                         {/* Dashboard */}
                         <SidebarItem
                             open={sidebarOpen}
@@ -66,75 +96,93 @@ export default function AuthenticatedLayout({ header, children }) {
                             active={route().current('dashboard')}
                         />
 
-                        {/* Section Title */}
-                        {sidebarOpen && (
-                            <SectionTitle text="Master Data" />
-                        )}
-
-                        <SidebarItem
+                        {/* Master Data Section */}
+                        <SectionDropdown
                             open={sidebarOpen}
-                            icon={<Shield />}
-                            text="Jenis APD"
-                            href={route('jenis-apd.index')}
-                            active={route().current('jenis-apd.*')}
-                        />
+                            title="Master Data"
+                            isOpen={masterDataOpen}
+                            toggle={() => setMasterDataOpen(!masterDataOpen)}
+                        >
+                            <SidebarItem
+                                open={sidebarOpen}
+                                icon={<Shield />}
+                                text="Jenis APD"
+                                href={route('jenis-apd.index')}
+                                active={route().current('jenis-apd.*')}
+                                isSubmenu
+                            />
 
-                        <SidebarItem
+                            <SidebarItem
+                                open={sidebarOpen}
+                                icon={<HardHat />}
+                                text="Master APD"
+                                href={route('apd.index')}
+                                active={route().current('apd.*')}
+                                isSubmenu
+                            />
+
+                            <SidebarItem
+                                open={sidebarOpen}
+                                icon={<MapPin />}
+                                text="Lokasi"
+                                href={route('lokasi.index')}
+                                active={route().current('lokasi.*')}
+                                isSubmenu
+                            />
+
+                            <SidebarItem
+                                open={sidebarOpen}
+                                icon={<MapPinned />}
+                                text="Gardu Induk"
+                                href={route('gardu-induk.index')}
+                                active={route().current('gardu-induk.*')}
+                                isSubmenu
+                            />
+                        </SectionDropdown>
+
+                        {/* Monitoring Section */}
+                        <SectionDropdown
                             open={sidebarOpen}
-                            icon={<HardHat />}
-                            text="Master APD"
-                            href={route('apd.index')}
-                            active={route().current('apd.*')}
-                        />
+                            title="Monitoring"
+                            isOpen={monitoringOpen}
+                            toggle={() => setMonitoringOpen(!monitoringOpen)}
+                        >
+                            <SidebarItem
+                                open={sidebarOpen}
+                                icon={<ClipboardCheck />}
+                                text="Monitoring APD"
+                                href={route('monitoring-apd.index')}
+                                active={route().current('monitoring-apd.*')}
+                                isSubmenu
+                            />
 
-                        <SidebarItem
+                            <SidebarItem
+                                open={sidebarOpen}
+                                icon={<Bell />}
+                                text="Notifikasi"
+                                href={route('notifikasi.index')}
+                                active={route().current('notifikasi.*')}
+                                badge={notificationCount > 0 ? notificationCount : null}
+                                isSubmenu
+                            />
+                        </SectionDropdown>
+
+                        {/* Transaksi Section */}
+                        <SectionDropdown
                             open={sidebarOpen}
-                            icon={<MapPin />}
-                            text="Lokasi"
-                            href={route('lokasi.index')}
-                            active={route().current('lokasi.*')}
-                        />
-
-                        <SidebarItem
-                            open={sidebarOpen}
-                            icon={<MapPinned />}
-                            text="Gardu Induk"
-                            href={route('gardu-induk.index')}
-                            active={route().current('gardu-induk.*')}
-                        />
-
-                        {sidebarOpen && (
-                            <SectionTitle text="Monitoring" />
-                        )}
-
-                        <SidebarItem
-                            open={sidebarOpen}
-                            icon={<ClipboardCheck />}
-                            text="Monitoring APD"
-                            href={route('monitoring-apd.index')}
-                            active={route().current('monitoring-apd.*')}
-                        />
-
-                        <SidebarItem
-                            open={sidebarOpen}
-                            icon={<Bell />}
-                            text="Notifikasi"
-                            href={route('notifikasi.index')}
-                            active={route().current('notifikasi.*')}
-                            badge={notificationCount > 0 ? notificationCount : null}
-                        />
-
-                        {sidebarOpen && (
-                            <SectionTitle text="Transaksi" />
-                        )}
-
-                        <SidebarItem
-                            open={sidebarOpen}
-                            icon={<Package />} 
-                            text="Serah Terima Barang"
-                            href={route('serah-terima.index')}
-                            active={route().current('serah.*')}
-                        />
+                            title="Transaksi"
+                            isOpen={transaksiOpen}
+                            toggle={() => setTransaksiOpen(!transaksiOpen)}
+                        >
+                            <SidebarItem
+                                open={sidebarOpen}
+                                icon={<Package />} 
+                                text="Serah Terima Barang"
+                                href={route('serah-terima.index')}
+                                active={route().current('serah-terima.*')}
+                                isSubmenu
+                            />
+                        </SectionDropdown>
 
                     </ul>
                 </nav>
@@ -151,7 +199,7 @@ export default function AuthenticatedLayout({ header, children }) {
                     {/* Tombol toggle sidebar */}
                     <button
                         onClick={() => setSidebarOpen(!sidebarOpen)}
-                        className="text-teal-600 hover:text-teal-700 focus:outline-none transition-colors"
+                        className="text-cyan-700 hover:text-cyan-800 focus:outline-none transition-colors"
                     >
                         <svg
                             className="h-6 w-6"
@@ -174,10 +222,10 @@ export default function AuthenticatedLayout({ header, children }) {
                             <span className="inline-flex rounded-md">
                                 <button
                                     type="button"
-                                    className="inline-flex items-center bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:text-teal-600 focus:outline-none transition-colors"
+                                    className="inline-flex items-center bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:text-cyan-700 focus:outline-none transition-colors"
                                 >
-                                    <div className="h-8 w-8 rounded-full bg-teal-100 flex items-center justify-center mr-2">
-                                        <span className="text-teal-600 font-semibold text-sm">
+                                    <div className="h-8 w-8 rounded-full bg-cyan-100 flex items-center justify-center mr-2">
+                                        <span className="text-cyan-700 font-semibold text-sm">
                                             {user.name.charAt(0).toUpperCase()}
                                         </span>
                                     </div>
@@ -225,33 +273,73 @@ export default function AuthenticatedLayout({ header, children }) {
 
 /* Komponen tambahan */
 
-function SidebarItem({ open, icon, text, href, active = false, badge = null }) {
+function SectionDropdown({ open, title, isOpen, toggle, children }) {
     return (
-        <li>
+        <li className="relative mx-2">
+            {/* Section Header - Clickable */}
+            <button
+                onClick={toggle}
+                className={`w-full flex items-center justify-between px-4 py-2.5 text-xs font-semibold text-cyan-200 uppercase tracking-wider bg-cyan-700/30 hover:bg-cyan-700/50 transition-colors rounded-lg ${
+                    !open ? 'justify-center' : ''
+                }`}
+            >
+                {open && <span>{title}</span>}
+                {open ? (
+                    isOpen ? (
+                        <ChevronDown className="h-4 w-4" />
+                    ) : (
+                        <ChevronRight className="h-4 w-4" />
+                    )
+                ) : (
+                    <div className="h-1 w-8 bg-cyan-300 rounded"></div>
+                )}
+            </button>
+
+            {/* Submenu Items */}
+            {isOpen && (
+                <ul className="space-y-0.5 mt-0.5 mx-0">
+                    {children}
+                </ul>
+            )}
+        </li>
+    );
+}
+
+function SidebarItem({ open, icon, text, href, active = false, badge = null, isSubmenu = false }) {
+    return (
+        <li className={`relative ${isSubmenu ? '' : 'mx-2'} my-0.5`}>
             <NavLink
                 href={href}
                 active={active}
-                className={`flex items-center gap-3 px-4 py-3.5 rounded-lg transition-all duration-200 no-underline relative ${
+                className={`flex items-center gap-3 px-4 py-2.5 transition-all duration-200 no-underline relative group w-full focus:outline-none ${
                     active
-                        ? 'bg-white/20 text-white shadow-md'
-                        : 'text-white/80 hover:text-white hover:bg-white/10'
+                        ? 'bg-gradient-to-r from-lime-400 to-green-500 text-gray-900 rounded-lg shadow-lg font-semibold'
+                        : 'text-white/80 hover:text-white hover:bg-white/10 rounded-lg'
                 }`}
             >
-                <span className="h-5 w-5 flex-shrink-0 relative">
+                {/* Icon */}
+                <span className={`h-5 w-5 flex-shrink-0 relative transition-all duration-200 ${
+                    active ? 'text-gray-900' : 'text-white/80 group-hover:text-white'
+                }`}>
                     {icon}
                     {/* Badge untuk icon saat sidebar tertutup */}
                     {!open && badge && (
-                        <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-teal-700">
+                        <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-cyan-800 shadow-lg animate-pulse">
                             {badge > 9 ? '9+' : badge}
                         </span>
                     )}
                 </span>
+                
                 {open && (
                     <div className="flex items-center justify-between flex-1">
-                        <span className="text-[15px] font-medium whitespace-nowrap">{text}</span>
-                        {/* Badge untuk text saat sidebar terbuka */}
+                        <span className={`text-[15px] whitespace-nowrap transition-all duration-200 ${
+                            active ? 'font-bold text-gray-900' : 'font-medium'
+                        }`}>
+                            {text}
+                        </span>
+                        {/* Badge dengan animasi */}
                         {badge && (
-                            <span className="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
+                            <span className="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center shadow-lg animate-pulse">
                                 {badge > 99 ? '99+' : badge}
                             </span>
                         )}
@@ -259,13 +347,5 @@ function SidebarItem({ open, icon, text, href, active = false, badge = null }) {
                 )}
             </NavLink>
         </li>
-    );
-}
-
-function SectionTitle({ text }) {
-    return (
-        <p className="px-4 pt-4 pb-1 text-xs font-semibold text-teal-200 uppercase tracking-wider">
-            {text}
-        </p>
     );
 }

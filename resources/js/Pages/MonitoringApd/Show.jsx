@@ -1,6 +1,6 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, Link } from "@inertiajs/react";
-import { ClipboardList } from "lucide-react";
+import { ClipboardList, ArrowLeft } from "lucide-react"; // Menambahkan ArrowLeft untuk tombol kembali
 
 export default function Show({ auth, monitoring }) {
     // 🗓️ Format tanggal agar mudah dibaca
@@ -13,27 +13,53 @@ export default function Show({ auth, monitoring }) {
         });
     };
 
+    // 🏷️ Gaya label yang konsisten
+    const Label = ({ children }) => (
+        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{children}</label>
+    );
+
+    // 📰 Gaya teks nilai yang konsisten
+    const Value = ({ children }) => (
+        <p className="text-sm text-gray-800 dark:text-gray-200 mt-0.5">{children}</p>
+    );
+
     return (
         <AuthenticatedLayout
             user={auth.user}
             header={
-                <div className="flex items-center gap-2">
-                    <ClipboardList className="w-6 h-6 text-blue-500" />
-                    <h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-                        {`Detail Monitoring APD "${monitoring.apd?.nama_apd || "-"}"`}
-                    </h2>
+                <div className="flex items-center justify-between">
+                    {/* 📦 HEADER KIRI - GAYA GRADIENT CYAN/TEAL */}
+                    <div className="flex items-center gap-2">
+                        {/* Wrapper Icon Gradient */}
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500 to-teal-600 shadow-md">
+                            {/* Icon diubah menjadi putih dan ukuran disesuaikan */}
+                            <ClipboardList className="h-5 w-5 text-white" />
+                        </div>
+                        <div>
+                            {/* Menyesuaikan teks header */}
+                            <h2 className="text-base font-semibold text-gray-800 dark:text-gray-200">
+                                {`Detail Monitoring APD "${monitoring.apd?.nama_apd || "-"}"`}
+                            </h2>
+                            <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                                Informasi lengkap pemantauan Alat Pelindung Diri
+                            </p>
+                        </div>
+                    </div>
                 </div>
             }
         >
             <Head title={`Detail Monitoring APD ${monitoring.apd?.nama_apd || ""}`} />
 
-            <div className="py-12">
-                <div className="max-w-5xl mx-auto sm:px-6 lg:px-8">
-                    <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                        <div className="p-6 text-gray-900 dark:text-gray-100">
+            {/* PERUBAHAN: Mengubah py-12 menjadi py-2 */}
+            <div className="py-2">
+                {/* PERUBAHAN: Mengubah max-w-5xl menjadi max-w-7xl */}
+                <div className="mx-auto max-w-7xl sm:px-2 lg:px-2">
+                    <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-md sm:rounded-lg">
+                        {/* PERUBAHAN: Mengubah p-6 menjadi p-3 */}
+                        <div className="p-3 text-gray-900 dark:text-gray-100 space-y-6">
+                            
                             {/* 🖼️ Gambar APD Detail */}
-                            <div className="flex justify-center mb-6">
-                                {/* PERUBAHAN: Menggunakan monitoring.apd?.gambar */}
+                            <div className="w-full flex justify-center mb-6 pt-2"> {/* Mengurangi mb-10 menjadi mb-6 dan menambahkan pt-2 */}
                                 {monitoring.apd?.gambar ? (
                                     <img
                                         src={
@@ -41,55 +67,45 @@ export default function Show({ auth, monitoring }) {
                                                 ? monitoring.apd.gambar
                                                 : `/storage/${monitoring.apd.gambar}`
                                         }
-                                        /* PERUBAHAN: Menggunakan monitoring.apd?.nama_apd untuk alt */
                                         alt={monitoring.apd?.nama_apd} 
-                                        className="w-64 h-64 object-cover rounded-xl border shadow-md"
+                                        className="w-48 h-48 object-cover rounded-xl shadow-lg border-2 border-gray-100 dark:border-gray-700" // Menyesuaikan ukuran dan style gambar
                                     />
                                 ) : (
-                                    <div className="w-64 h-64 flex items-center justify-center bg-gray-100 dark:bg-gray-700 text-gray-400 rounded-xl">
+                                    <div className="w-48 h-48 flex items-center justify-center bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 rounded-xl text-xs shadow-md">
                                         Tidak ada gambar
                                     </div>
                                 )}
                             </div>
 
                             {/* 📋 Informasi Detail Monitoring */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+                            {/* Mengubah gap-y-6 menjadi gap-y-4 untuk kepadatan yang lebih baik */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
+                                
                                 {/* Kolom kiri */}
                                 <div>
                                     <div className="mb-4">
-                                        <label className="font-bold text-gray-700 dark:text-gray-300">
-                                            ID Monitoring
-                                        </label>
-                                        <p>{monitoring.monitoring_id}</p>
+                                        <Label>ID Monitoring</Label>
+                                        <Value>{monitoring.monitoring_id}</Value>
                                     </div>
 
                                     <div className="mb-4">
-                                        <label className="font-bold text-gray-700 dark:text-gray-300">
-                                            Kode APD
-                                        </label>
-                                        <p>{monitoring.apd?.kode_apd || "-"}</p>
+                                        <Label>Kode APD</Label>
+                                        <Value>{monitoring.apd?.kode_apd || "-"}</Value>
                                     </div>
 
                                     <div className="mb-4">
-                                        <label className="font-bold text-gray-700 dark:text-gray-300">
-                                            Nama APD
-                                        </label>
-                                        {/* PERUBAHAN: Menggunakan monitoring.apd?.nama_apd */}
-                                        <p>{monitoring.apd?.nama_apd || "-"}</p> 
+                                        <Label>Nama APD</Label>
+                                        <Value>{monitoring.apd?.nama_apd || "-"}</Value> 
                                     </div>
 
                                     <div className="mb-4">
-                                        <label className="font-bold text-gray-700 dark:text-gray-300">
-                                            Lokasi
-                                        </label>
-                                        <p>{monitoring.lokasi?.nama_lokasi || "-"}</p>
+                                        <Label>Lokasi</Label>
+                                        <Value>{monitoring.lokasi?.nama_lokasi || "-"}</Value>
                                     </div>
 
                                     <div className="mb-4">
-                                        <label className="font-bold text-gray-700 dark:text-gray-300">
-                                            Gardu Induk
-                                        </label>
-                                        <p>{monitoring.gardu_induk?.nama_gardu_induk || "-"}</p>
+                                        <Label>Gardu Induk</Label>
+                                        <Value>{monitoring.gardu_induk?.nama_gardu_induk || "-"}</Value>
                                     </div>
                                 </div>
 
@@ -97,17 +113,15 @@ export default function Show({ auth, monitoring }) {
                                 <div>
                                     {/* 🧮 Stok */}
                                     <div className="mb-4">
-                                        <label className="font-bold text-gray-700 dark:text-gray-300">
-                                            Stok
-                                        </label>
+                                        <Label>Stok</Label>
                                         <div className="mt-1">
                                             <span
-                                                className={`inline-flex items-center justify-center w-10 h-10 rounded-full font-semibold text-sm ${
+                                                className={`inline-flex items-center justify-center w-10 h-10 rounded-full font-semibold text-sm shadow-sm ${
                                                     monitoring.stok <= 0
-                                                        ? "bg-red-100 text-red-700"
+                                                        ? "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300"
                                                         : monitoring.stok <= 5
-                                                        ? "bg-yellow-100 text-yellow-700"
-                                                        : "bg-green-100 text-green-700"
+                                                        ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300"
+                                                        : "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300"
                                                 }`}
                                             >
                                                 {monitoring.stok || 0}
@@ -117,21 +131,20 @@ export default function Show({ auth, monitoring }) {
 
                                     {/* ⚙️ Kondisi */}
                                     <div className="mb-4">
-                                        <label className="font-bold text-gray-700 dark:text-gray-300">
-                                            Kondisi
-                                        </label>
+                                        <Label>Kondisi</Label>
                                         <div className="mt-1">
                                             <span
-                                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${
+                                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm ${
                                                     monitoring.kondisi === "Baik"
-                                                        ? "bg-green-100 text-green-700 border border-green-200"
+                                                        ? "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300 border border-green-200 dark:border-green-900"
                                                         : monitoring.kondisi === "Perlu Diganti"
-                                                        ? "bg-yellow-100 text-yellow-700 border border-yellow-200"
+                                                        ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-900"
                                                         : monitoring.kondisi === "Rusak"
-                                                        ? "bg-red-100 text-red-700 border border-red-200"
-                                                        : "bg-gray-100 text-gray-700 border border-gray-200"
+                                                        ? "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300 border border-red-200 dark:border-red-900"
+                                                        : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300 border border-gray-200 dark:border-gray-600"
                                                 }`}
                                             >
+                                                {/* Memastikan ikon tetap di tempatnya */}
                                                 {monitoring.kondisi === "Baik" && (
                                                     <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                                         <path
@@ -166,17 +179,15 @@ export default function Show({ auth, monitoring }) {
 
                                     {/* 🔔 Status */}
                                     <div className="mb-4">
-                                        <label className="font-bold text-gray-700 dark:text-gray-300">
-                                            Status Masa Berlaku
-                                        </label>
+                                        <Label>Status Masa Berlaku</Label>
                                         <div className="mt-1">
                                             <span
-                                                className={`px-2 py-1 rounded text-xs font-medium ${
+                                                className={`px-2 py-1 rounded text-xs font-medium shadow-sm ${
                                                     monitoring.status_notifikasi_otomatis === "Active"
-                                                        ? "bg-green-100 text-green-700"
+                                                        ? "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300"
                                                         : monitoring.status_notifikasi_otomatis === "Warning"
-                                                        ? "bg-yellow-100 text-yellow-700"
-                                                        : "bg-red-100 text-red-700"
+                                                        ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300"
+                                                        : "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300"
                                                 }`}
                                             >
                                                 {monitoring.status_notifikasi_otomatis || "-"}
@@ -185,42 +196,38 @@ export default function Show({ auth, monitoring }) {
                                     </div>
 
                                     <div className="mb-4">
-                                        <label className="font-bold text-gray-700 dark:text-gray-300">
-                                            Catatan
-                                        </label>
-                                        <p>{monitoring.catatan || "-"}</p>
+                                        <Label>Catatan</Label>
+                                        <Value>{monitoring.catatan || "-"}</Value>
                                     </div>
                                 </div>
                             </div>
 
                             {/* 🕒 Tanggal-tanggal Penting */}
-                            <div className="mt-6 border-t pt-6 border-gray-200 dark:border-gray-700 grid grid-cols-1 md:grid-cols-2 gap-y-4">
+                            {/* Mengubah gap-y-4 menjadi gap-y-6 dan menyesuaikan label/value */}
+                            <div className="mt-6 border-t pt-6 border-gray-200 dark:border-gray-700 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
                                 <div>
-                                    <label className="font-bold text-gray-700 dark:text-gray-300">
-                                        Tanggal Distribusi
-                                    </label>
-                                    <p>{formatDate(monitoring.tanggal_distribusi)}</p>
+                                    <Label>Tanggal Distribusi</Label>
+                                    <Value>{formatDate(monitoring.tanggal_distribusi)}</Value>
                                 </div>
                                 <div>
-                                    <label className="font-bold text-gray-700 dark:text-gray-300">
-                                        Tanggal Pemeriksaan
-                                    </label>
-                                    <p>{formatDate(monitoring.tanggal_pemeriksaan)}</p>
+                                    <Label>Tanggal Pemeriksaan</Label>
+                                    <Value>{formatDate(monitoring.tanggal_pemeriksaan)}</Value>
                                 </div>
                                 <div>
-                                    <label className="font-bold text-gray-700 dark:text-gray-300">
-                                        Tanggal Berakhir
-                                    </label>
-                                    <p>{formatDate(monitoring.tanggal_berakhir)}</p>
+                                    <Label>Tanggal Berakhir</Label>
+                                    <Value>{formatDate(monitoring.tanggal_berakhir)}</Value>
                                 </div>
                             </div>
 
-                            {/* 🔙 Tombol kembali */}
-                            <div className="mt-8 flex justify-end space-x-2">
+                            {/* 🔙 Tombol kembali - GAYA GRADIENT CYAN/TEAL */}
+                            {/* Mengubah mt-8 dan menambahkan border-t/pt-3 */}
+                            <div className="mt-6 pt-3 border-t border-gray-200 dark:border-gray-700 flex justify-end">
                                 <Link
                                     href={route("monitoring-apd.index")}
-                                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium shadow"
+                                    // Menggunakan gaya gradient Cyan/Teal
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-gradient-to-r from-cyan-600 to-teal-600 rounded-lg shadow-md hover:from-cyan-700 hover:to-teal-700 transition-all"
                                 >
+                                    <ArrowLeft className="h-4 w-4" />
                                     Kembali
                                 </Link>
                             </div>

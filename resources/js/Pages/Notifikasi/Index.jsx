@@ -83,167 +83,172 @@ export default function Index({ auth, notifications, statistics, filters }) {
         <AuthenticatedLayout
             user={auth.user}
             header={
-                <div className="flex items-center gap-3">
-                    <BellIcon className="w-7 h-7 text-orange-500" />
-                    <div>
-                        <h2 className="text-xl font-semibold text-gray-800">
-                            Notifikasi Monitoring APD
-                        </h2>
-                        <p className="text-sm text-gray-500">
-                            Monitoring masa expired Alat Pelindung Diri (APD) berdasarkan standar SPLN
-                        </p>
+                <div className="flex items-center justify-between">
+                    {/* Header kiri */}
+                    <div className="flex items-center gap-2">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500 to-teal-600 shadow-md">
+                            <BellIcon className="h-5 w-5 text-white" />
+                        </div>
+                        <div>
+                            <h2 className="text-base font-semibold text-gray-800 dark:text-gray-200">
+                                Notifikasi Monitoring APD
+                            </h2>
+                            <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                                Monitoring masa expired APD berdasarkan standar SPLN
+                            </p>
+                        </div>
                     </div>
                 </div>
             }
         >
             <Head title="Notifikasi APD" />
 
-            <div className="py-6">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            <div className="py-2">
+                <div className="mx-auto max-w-7xl sm:px-2 lg:px-2 space-y-2">
                     
                     {/* Statistics Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                         {/* Expired Card */}
-                        <div className="bg-white rounded-lg shadow-sm p-6 border-l-4 border-red-500">
-                            <div className="flex items-center gap-3 mb-2">
-                                <ExclamationTriangleIcon className="w-5 h-5 text-red-500" />
-                                <p className="text-sm text-gray-600">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 border-l-4 border-red-500">
+                            <div className="flex items-center gap-2 mb-1">
+                                <ExclamationTriangleIcon className="w-4 h-4 text-red-500" />
+                                <p className="text-xs text-gray-600 dark:text-gray-400">
                                     Expired / Segera Expired
                                 </p>
                             </div>
-                            <p className="text-4xl font-bold text-gray-900">
+                            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                                 {statistics.expired}
                             </p>
                         </div>
 
                         {/* Warning Card */}
-                        <div className="bg-white rounded-lg shadow-sm p-6 border-l-4 border-yellow-500">
-                            <div className="flex items-center gap-3 mb-2">
-                                <ClockIcon className="w-5 h-5 text-yellow-500" />
-                                <p className="text-sm text-gray-600">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 border-l-4 border-yellow-500">
+                            <div className="flex items-center gap-2 mb-1">
+                                <ClockIcon className="w-4 h-4 text-yellow-500" />
+                                <p className="text-xs text-gray-600 dark:text-gray-400">
                                     Masa Pakai Menipis
                                 </p>
                             </div>
-                            <p className="text-4xl font-bold text-gray-900">
+                            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                                 {statistics.warning}
                             </p>
                         </div>
 
                         {/* Active Card */}
-                        <div className="bg-white rounded-lg shadow-sm p-6 border-l-4 border-green-500">
-                            <div className="flex items-center gap-3 mb-2">
-                                <CheckCircleIcon className="w-5 h-5 text-green-500" />
-                                <p className="text-sm text-gray-600">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 border-l-4 border-green-500">
+                            <div className="flex items-center gap-2 mb-1">
+                                <CheckCircleIcon className="w-4 h-4 text-green-500" />
+                                <p className="text-xs text-gray-600 dark:text-gray-400">
                                     Kondisi Aman
                                 </p>
                             </div>
-                            <p className="text-4xl font-bold text-gray-900">
+                            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                                 {statistics.active}
                             </p>
                         </div>
                     </div>
 
                     {/* Filter & Search Section */}
-                    <div className="bg-white rounded-lg shadow-sm">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md">
                         {/* Filter Tabs */}
-                        <div className="px-6 pt-6">
-                            <div className="flex flex-wrap gap-2 pb-4">
+                        <div className="px-3 pt-3">
+                            <div className="flex flex-wrap gap-1.5 pb-2">
                                 <button
                                     onClick={() => handleFilterStatus('Semua')}
-                                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                                         activeFilter === 'Semua'
-                                            ? 'bg-teal-600 text-white'
-                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                            ? 'bg-gradient-to-r from-cyan-600 to-teal-600 text-white'
+                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                                     }`}
                                 >
                                     Semua
                                 </button>
                                 <button
                                     onClick={() => handleFilterStatus('Merah')}
-                                    className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 ${
                                         activeFilter === 'Merah'
                                             ? 'bg-red-600 text-white'
-                                            : 'bg-white text-red-600 border border-red-200 hover:bg-red-50'
+                                            : 'bg-white dark:bg-gray-700 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900/20'
                                     }`}
                                 >
-                                    <ExclamationTriangleIcon className="w-4 h-4" />
+                                    <ExclamationTriangleIcon className="w-3 h-3" />
                                     Merah (&lt; 30 hari)
                                 </button>
                                 <button
                                     onClick={() => handleFilterStatus('Kuning')}
-                                    className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 ${
                                         activeFilter === 'Kuning'
                                             ? 'bg-yellow-600 text-white'
-                                            : 'bg-white text-yellow-600 border border-yellow-200 hover:bg-yellow-50'
+                                            : 'bg-white dark:bg-gray-700 text-yellow-600 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-800 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
                                     }`}
                                 >
-                                    <ClockIcon className="w-4 h-4" />
+                                    <ClockIcon className="w-3 h-3" />
                                     Kuning (30-90 hari)
                                 </button>
                                 <button
                                     onClick={() => handleFilterStatus('Hijau')}
-                                    className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 ${
                                         activeFilter === 'Hijau'
                                             ? 'bg-green-600 text-white'
-                                            : 'bg-white text-green-600 border border-green-200 hover:bg-green-50'
+                                            : 'bg-white dark:bg-gray-700 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800 hover:bg-green-50 dark:hover:bg-green-900/20'
                                     }`}
                                 >
-                                    <CheckCircleIcon className="w-4 h-4" />
+                                    <CheckCircleIcon className="w-3 h-3" />
                                     Hijau (&gt; 90 hari)
                                 </button>
                             </div>
                         </div>
 
                         {/* Search Bar */}
-                        <div className="px-6 py-4">
+                        <div className="px-3 py-2">
                             <div className="relative">
                                 <input
                                     type="text"
                                     value={search}
                                     onChange={handleSearch}
                                     placeholder="Cari nama APD, lokasi, atau gardu induk..."
-                                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm"
+                                    className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-200"
                                 />
-                                <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+                                <MagnifyingGlassIcon className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
                             </div>
                         </div>
 
                         {/* Notifications List */}
-                        <div className="p-6">
-                            <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-lg font-semibold text-gray-800">Daftar Notifikasi</h3>
+                        <div className="p-3">
+                            <div className="flex items-center justify-between mb-3">
+                                <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">Daftar Notifikasi</h3>
                                 <button
                                     onClick={handleMarkAllRead}
-                                    className="text-sm text-teal-600 hover:text-teal-700 font-medium hover:underline"
+                                    className="text-xs text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 font-medium hover:underline"
                                 >
                                     Tandai Semua Dibaca
                                 </button>
                             </div>
 
                             {notifications.data.length === 0 ? (
-                                <div className="text-center py-16">
-                                    <BellIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                                    <p className="text-gray-500 text-base">Tidak ada notifikasi ditemukan</p>
+                                <div className="text-center py-8">
+                                    <BellIcon className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-2 opacity-30" />
+                                    <p className="text-gray-500 dark:text-gray-400 text-sm">Tidak ada notifikasi ditemukan</p>
                                 </div>
                             ) : (
                                 <>
-                                    <div className="space-y-4">
+                                    <div className="space-y-2">
                                         {notifications.data.map((notif) => (
                                             <div
                                                 key={notif.monitoring_id}
-                                                className="bg-white rounded-lg p-5 hover:shadow-md transition-all border border-gray-200 hover:border-gray-300"
+                                                className="bg-white dark:bg-gray-700 rounded-lg p-3 hover:shadow-md transition-all border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
                                             >
-                                                <div className="flex gap-4">
+                                                <div className="flex gap-3">
                                                     {/* Icon */}
-                                                    <div className={`flex-shrink-0 w-14 h-14 rounded-lg ${getIconColorClass(notif.badge_color)} flex items-center justify-center`}>
+                                                    <div className={`flex-shrink-0 w-12 h-12 rounded-lg ${getIconColorClass(notif.badge_color)} flex items-center justify-center`}>
                                                         {notif.apd_gambar ? (
                                                             <img 
                                                                 src={notif.apd_gambar} 
                                                                 alt={notif.apd_nama}
-                                                                className="w-10 h-10 object-cover rounded"
+                                                                className="w-9 h-9 object-cover rounded"
                                                             />
                                                         ) : (
-                                                            <ShieldCheckIcon className={`w-8 h-8 ${
+                                                            <ShieldCheckIcon className={`w-6 h-6 ${
                                                                 notif.badge_color === 'red' ? 'text-red-500' :
                                                                 notif.badge_color === 'yellow' ? 'text-yellow-500' :
                                                                 'text-green-500'
@@ -254,22 +259,22 @@ export default function Index({ auth, notifications, statistics, filters }) {
                                                     {/* Content */}
                                                     <div className="flex-1 min-w-0">
                                                         {/* Header */}
-                                                        <div className="flex items-start justify-between gap-4 mb-2">
+                                                        <div className="flex items-start justify-between gap-3 mb-1.5">
                                                             <div className="flex-1 min-w-0">
-                                                                <h4 className="text-base font-semibold text-gray-900 truncate">
+                                                                <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
                                                                     {notif.apd_nama}
                                                                 </h4>
-                                                                <p className="text-sm text-gray-600 mt-0.5">
+                                                                <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
                                                                     Kode: {notif.apd_kode}
                                                                 </p>
                                                             </div>
-                                                            <span className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold ${getBadgeClass(notif.badge_color)}`}>
+                                                            <span className={`flex-shrink-0 px-2 py-0.5 rounded-full text-[10px] font-semibold ${getBadgeClass(notif.badge_color)}`}>
                                                                 • {notif.status_notifikasi}
                                                             </span>
                                                         </div>
 
                                                         {/* Description */}
-                                                        <p className="text-sm text-gray-700 mb-4 leading-relaxed">
+                                                        <p className="text-xs text-gray-700 dark:text-gray-300 mb-2 leading-relaxed">
                                                             {notif.status_notifikasi === 'Expired' && notif.hari_tersisa < 0
                                                                 ? `APD telah melewati masa expired. Segera lakukan pergantian untuk menjaga keamanan pekerja.`
                                                                 : notif.status_notifikasi === 'Expired'
@@ -281,35 +286,35 @@ export default function Index({ auth, notifications, statistics, filters }) {
                                                         </p>
 
                                                         {/* Details Grid */}
-                                                        <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-3">
-                                                            <div className="flex items-center gap-2">
-                                                                <BuildingOfficeIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                                                        <div className="flex flex-wrap gap-2 text-xs text-gray-600 dark:text-gray-400 mb-2">
+                                                            <div className="flex items-center gap-1.5">
+                                                                <BuildingOfficeIcon className="w-3 h-3 text-gray-400 dark:text-gray-500 flex-shrink-0" />
                                                                 <span>{notif.lokasi_nama}</span>
                                                             </div>
-                                                            <div className="flex items-center gap-2">
-                                                                <MapPinIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                                                            <div className="flex items-center gap-1.5">
+                                                                <MapPinIcon className="w-3 h-3 text-gray-400 dark:text-gray-500 flex-shrink-0" />
                                                                 <span>{notif.gardu_nama}</span>
                                                             </div>
-                                                            <div className="flex items-center gap-2">
-                                                                <CalendarIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                                                            <div className="flex items-center gap-1.5">
+                                                                <CalendarIcon className="w-3 h-3 text-gray-400 dark:text-gray-500 flex-shrink-0" />
                                                                 <span>Expired: {new Date(notif.tanggal_berakhir).toLocaleDateString('id-ID')}</span>
                                                             </div>
-                                                            <div className="flex items-center gap-2">
-                                                                <ShieldCheckIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                                                            <div className="flex items-center gap-1.5">
+                                                                <ShieldCheckIcon className="w-3 h-3 text-gray-400 dark:text-gray-500 flex-shrink-0" />
                                                                 <span>SPLN: {notif.standar}</span>
                                                             </div>
                                                         </div>
 
                                                         {/* Footer */}
                                                         <div className="flex items-center justify-between">
-                                                            <span className={`text-sm font-semibold ${
-                                                                notif.badge_color === 'red' ? 'text-red-600' :
-                                                                notif.badge_color === 'yellow' ? 'text-yellow-600' :
-                                                                'text-green-600'
+                                                            <span className={`text-xs font-semibold ${
+                                                                notif.badge_color === 'red' ? 'text-red-600 dark:text-red-400' :
+                                                                notif.badge_color === 'yellow' ? 'text-yellow-600 dark:text-yellow-400' :
+                                                                'text-green-600 dark:text-green-400'
                                                             }`}>
                                                                 • {notif.status_text}
                                                             </span>
-                                                            <p className="text-xs text-gray-500">
+                                                            <p className="text-[10px] text-gray-500 dark:text-gray-500">
                                                                 {notif.created_at}
                                                             </p>
                                                         </div>
@@ -321,7 +326,7 @@ export default function Index({ auth, notifications, statistics, filters }) {
 
                                     {/* Pagination */}
                                     {notifications.links && notifications.links.length > 3 && (
-                                        <div className="flex items-center justify-center gap-2 mt-8">
+                                        <div className="flex items-center justify-center gap-1.5 mt-4">
                                             {notifications.links.map((link, index) => (
                                                 <button
                                                     key={index}
@@ -330,12 +335,12 @@ export default function Index({ auth, notifications, statistics, filters }) {
                                                         status: activeFilter,
                                                     })}
                                                     disabled={!link.url || link.active}
-                                                    className={`min-w-[40px] px-4 py-2 rounded-lg font-medium transition-colors ${
+                                                    className={`min-w-[32px] px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                                                         link.active
-                                                            ? 'bg-teal-600 text-white'
+                                                            ? 'bg-gradient-to-r from-cyan-600 to-teal-600 text-white'
                                                             : link.url
-                                                            ? 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
-                                                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                            ? 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600'
+                                                            : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
                                                     }`}
                                                     dangerouslySetInnerHTML={{ __html: link.label }}
                                                 />

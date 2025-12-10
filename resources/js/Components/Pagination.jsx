@@ -14,10 +14,10 @@ export default function Pagination({ links }) {
                         router.get(link.url, {}, { preserveScroll: true, preserveState: true });
                     }}
                     dangerouslySetInnerHTML={{ __html: link.label }}
-                    className={`px-3 py-1 rounded text-sm transition ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                         link.active
-                            ? "bg-blue-600 text-white font-bold"
-                            : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-100"
+                            ? "bg-gradient-to-r from-cyan-600 to-teal-600 text-white shadow-md"
+                            : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
                     } ${!link.url ? "opacity-50 cursor-not-allowed" : ""}`}
                 />
             ))}
