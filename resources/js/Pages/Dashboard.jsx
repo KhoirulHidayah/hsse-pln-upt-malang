@@ -455,7 +455,7 @@ export default function Dashboard({ auth, statistics }) {
                             <Package className="h-5 w-5 text-cyan-600" />
                             Akses Cepat
                         </h3>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                             <Link 
                                 href={route('monitoring-apd.create')}
                                 className="flex flex-col items-center justify-center p-3 bg-gradient-to-br from-cyan-50 to-teal-50 dark:from-cyan-900/20 dark:to-teal-900/20 rounded-lg hover:shadow-md transition-all border border-cyan-200 dark:border-cyan-800"
@@ -486,6 +486,14 @@ export default function Dashboard({ auth, statistics }) {
                             >
                                 <AlertTriangle className="h-6 w-6 text-amber-600 dark:text-amber-400 mb-1" />
                                 <span className="text-xs font-medium text-gray-700 dark:text-gray-300 text-center">Lihat Notifikasi</span>
+                            </Link>
+                            
+                            <Link 
+                                href={route('monitoring-apd.laporan')}
+                                className="flex flex-col items-center justify-center p-3 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg hover:shadow-md transition-all border border-purple-200 dark:border-purple-800"
+                            >
+                                <BarChart3 className="h-6 w-6 text-purple-600 dark:text-purple-400 mb-1" />
+                                <span className="text-xs font-medium text-gray-700 dark:text-gray-300 text-center">Laporan Masa Pakai</span>
                             </Link>
                         </div>
                     </div>
