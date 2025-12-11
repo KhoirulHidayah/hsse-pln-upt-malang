@@ -429,4 +429,302 @@ class MonitoringApdController extends Controller
 
         return response()->download($path, $filename)->deleteFileAfterSend(false);
     }
+
+        
+    /**
+     * 📊 Tampilkan halaman laporan masa pakai APD
+     */
+    public function laporan(Request $request)
+    {
+        // 🔍 Ambil parameter filter
+        $lokasi_id = $request->input('lokasi_id');
+        $gardu_induk_id = $request->input('gardu_induk_id');
+        $kondisi = $request->input('kondisi');
+        $status_notifikasi = $request->input('status_notifikasi');
+
+        // 📊 Query data
+        $query = MonitoringApd::with(['apd', 'lokasi', 'garduInduk'])
+            ->when($lokasi_id, fn($q) => $q->where('lokasi_id', $lokasi_id))
+            ->when($gardu_induk_id, fn($q) => $q->where('gardu_induk_id', $gardu_induk_id))
+            ->when($kondisi, fn($q) => $q->where('kondisi', $kondisi));
+
+        // Filter status notifikasi DINAMIS
+        if ($status_notifikasi) {
+            if ($status_notifikasi === 'Expired') {
+                $query->whereNotNull('tanggal_berakhir')
+                    ->whereRaw('DATEDIFF(tanggal_berakhir, CURDATE()) < 30');
+            } elseif ($status_notifikasi === 'Warning') {
+                $query->whereNotNull('tanggal_berakhir')
+                    ->whereRaw('DATEDIFF(tanggal_berakhir, CURDATE()) BETWEEN 30 AND 90');
+            } elseif ($status_notifikasi === 'Active') {
+                $query->whereNotNull('tanggal_berakhir')
+                    ->whereRaw('DATEDIFF(tanggal_berakhir, CURDATE()) > 90');
+            }
+        }
+
+        $query->orderBy('tanggal_berakhir', 'asc');
+
+        // 📋 Format data untuk laporan
+        $monitorings = $query->get()->map(function ($item) {
+            $today = Carbon::now()->startOfDay();
+            $tanggalBerakhir = $item->tanggal_berakhir 
+                ? Carbon::parse($item->tanggal_berakhir)->startOfDay() 
+                : null;
+            
+            $selisih = $tanggalBerakhir 
+                ? (int) $today->diffInDays($tanggalBerakhir, false) 
+                : null;
+            
+            $statusNotifikasi = 'Active';
+            if ($selisih !== null) {
+                if ($selisih < 30) {
+                    $statusNotifikasi = 'Expired';
+                } elseif ($selisih >= 30 && $selisih <= 90) {
+                    $statusNotifikasi = 'Warning';
+                } else {
+                    $statusNotifikasi = 'Active';
+                }
+            }
+
+            // Hitung masa pakai (dari distribusi ke berakhir)
+            $masaPakai = null;
+            if ($item->tanggal_distribusi && $item->tanggal_berakhir) {
+                $distribusi = Carbon::parse($item->tanggal_distribusi);
+                $berakhir = Carbon::parse($item->tanggal_berakhir);
+                $masaPakai = $distribusi->diffInDays($berakhir);
+            }
+
+            // Hitung sisa masa pakai
+            $sisaMasaPakai = $selisih;
+
+            return [
+                'monitoring_id' => $item->monitoring_id,
+                'apd_nama' => optional($item->apd)->nama_apd ?? '-',
+                'apd_kode' => optional($item->apd)->kode_apd ?? '-',
+                'lokasi_nama' => optional($item->lokasi)->nama_lokasi ?? '-',
+                'gardu_nama' => optional($item->garduInduk)->nama_gardu_induk ?? '-',
+                'stok' => $item->stok,
+                'tanggal_distribusi' => optional($item->tanggal_distribusi)->format('Y-m-d') ?? '-',
+                'tanggal_pemeriksaan' => optional($item->tanggal_pemeriksaan)->format('Y-m-d') ?? '-',
+                'tanggal_berakhir' => optional($item->tanggal_berakhir)->format('Y-m-d') ?? '-',
+                'kondisi' => $item->kondisi,
+                'status_notifikasi' => $statusNotifikasi,
+                'masa_pakai_hari' => $masaPakai,
+                'sisa_masa_pakai_hari' => $sisaMasaPakai,
+                'catatan' => $item->catatan,
+            ];
+        });
+
+        // 📊 Statistik
+        $stats = [
+            'total' => $monitorings->count(),
+            'active' => $monitorings->where('status_notifikasi', 'Active')->count(),
+            'warning' => $monitorings->where('status_notifikasi', 'Warning')->count(),
+            'expired' => $monitorings->where('status_notifikasi', 'Expired')->count(),
+            'baik' => $monitorings->where('kondisi', 'Baik')->count(),
+            'rusak' => $monitorings->where('kondisi', 'Rusak')->count(),
+            'perlu_diganti' => $monitorings->where('kondisi', 'Perlu Diganti')->count(),
+        ];
+
+        // 📋 Data dropdown
+        $lokasiList = Lokasi::select('lokasi_id', 'nama_lokasi')->get();
+        $garduList = GarduInduk::select('gardu_induk_id', 'nama_gardu_induk', 'lokasi_id')->get();
+
+        return Inertia::render('MonitoringApd/Laporan', [
+            'monitorings' => $monitorings,
+            'lokasiList' => $lokasiList,
+            'garduList' => $garduList,
+            'stats' => $stats,
+            'filters' => [
+                'lokasi_id' => $lokasi_id,
+                'gardu_induk_id' => $gardu_induk_id,
+                'kondisi' => $kondisi,
+                'status_notifikasi' => $status_notifikasi,
+            ],
+        ]);
+    }
+
+    /**
+     * 📥 Export laporan ke Excel
+     */
+    public function exportLaporan(Request $request)
+    {
+        $lokasi_id = $request->input('lokasi_id');
+        $gardu_induk_id = $request->input('gardu_induk_id');
+        $kondisi = $request->input('kondisi');
+        $status_notifikasi = $request->input('status_notifikasi');
+
+        // Query data dengan filter yang sama
+        $query = MonitoringApd::with(['apd', 'lokasi', 'garduInduk'])
+            ->when($lokasi_id, fn($q) => $q->where('lokasi_id', $lokasi_id))
+            ->when($gardu_induk_id, fn($q) => $q->where('gardu_induk_id', $gardu_induk_id))
+            ->when($kondisi, fn($q) => $q->where('kondisi', $kondisi));
+
+        if ($status_notifikasi) {
+            if ($status_notifikasi === 'Expired') {
+                $query->whereNotNull('tanggal_berakhir')
+                    ->whereRaw('DATEDIFF(tanggal_berakhir, CURDATE()) < 30');
+            } elseif ($status_notifikasi === 'Warning') {
+                $query->whereNotNull('tanggal_berakhir')
+                    ->whereRaw('DATEDIFF(tanggal_berakhir, CURDATE()) BETWEEN 30 AND 90');
+            } elseif ($status_notifikasi === 'Active') {
+                $query->whereNotNull('tanggal_berakhir')
+                    ->whereRaw('DATEDIFF(tanggal_berakhir, CURDATE()) > 90');
+            }
+        }
+
+        $monitorings = $query->orderBy('tanggal_berakhir', 'asc')->get();
+
+        // Buat spreadsheet
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Laporan Masa Pakai APD');
+
+        // Header laporan
+        $sheet->setCellValue('A1', 'LAPORAN MASA PAKAI APD');
+        $sheet->mergeCells('A1:N1');
+        $sheet->getStyle('A1')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 16, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '4472C4']],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+        ]);
+        $sheet->getRowDimension('1')->setRowHeight(30);
+
+        // Info filter
+        $row = 2;
+        $sheet->setCellValue('A' . $row, 'Tanggal Cetak: ' . Carbon::now()->format('d/m/Y H:i'));
+        $sheet->mergeCells('A' . $row . ':N' . $row);
+        $row++;
+
+        if ($lokasi_id) {
+            $lokasi = Lokasi::find($lokasi_id);
+            $sheet->setCellValue('A' . $row, 'Filter Lokasi: ' . ($lokasi->nama_lokasi ?? '-'));
+            $sheet->mergeCells('A' . $row . ':N' . $row);
+            $row++;
+        }
+
+        if ($gardu_induk_id) {
+            $gardu = GarduInduk::find($gardu_induk_id);
+            $sheet->setCellValue('A' . $row, 'Filter Gardu Induk: ' . ($gardu->nama_gardu_induk ?? '-'));
+            $sheet->mergeCells('A' . $row . ':N' . $row);
+            $row++;
+        }
+
+        if ($kondisi) {
+            $sheet->setCellValue('A' . $row, 'Filter Kondisi: ' . $kondisi);
+            $sheet->mergeCells('A' . $row . ':N' . $row);
+            $row++;
+        }
+
+        if ($status_notifikasi) {
+            $sheet->setCellValue('A' . $row, 'Filter Status: ' . $status_notifikasi);
+            $sheet->mergeCells('A' . $row . ':N' . $row);
+            $row++;
+        }
+
+        $row++; // Baris kosong
+
+        // Header tabel
+        $headers = [
+            'No', 'Kode APD', 'Nama APD', 'Lokasi', 'Gardu Induk', 'Stok',
+            'Tanggal Distribusi', 'Tanggal Pemeriksaan', 'Tanggal Berakhir',
+            'Masa Pakai (Hari)', 'Sisa Hari', 'Kondisi', 'Status', 'Catatan'
+        ];
+
+        $sheet->fromArray([$headers], null, 'A' . $row);
+        
+        $headerStyle = [
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 11],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '0070C0']],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+        ];
+        
+        $sheet->getStyle('A' . $row . ':N' . $row)->applyFromArray($headerStyle);
+        $row++;
+
+        // Data
+        $no = 1;
+        foreach ($monitorings as $item) {
+            $today = Carbon::now()->startOfDay();
+            $tanggalBerakhir = $item->tanggal_berakhir 
+                ? Carbon::parse($item->tanggal_berakhir)->startOfDay() 
+                : null;
+            
+            $selisih = $tanggalBerakhir 
+                ? (int) $today->diffInDays($tanggalBerakhir, false) 
+                : null;
+            
+            $statusNotifikasi = 'Active';
+            if ($selisih !== null) {
+                if ($selisih < 30) {
+                    $statusNotifikasi = 'Expired';
+                } elseif ($selisih >= 30 && $selisih <= 90) {
+                    $statusNotifikasi = 'Warning';
+                } else {
+                    $statusNotifikasi = 'Active';
+                }
+            }
+
+            $masaPakai = null;
+            if ($item->tanggal_distribusi && $item->tanggal_berakhir) {
+                $distribusi = Carbon::parse($item->tanggal_distribusi);
+                $berakhir = Carbon::parse($item->tanggal_berakhir);
+                $masaPakai = $distribusi->diffInDays($berakhir);
+            }
+
+            $data = [
+                $no++,
+                $item->apd->kode_apd ?? '-',
+                $item->apd->nama_apd ?? '-',
+                $item->lokasi->nama_lokasi ?? '-',
+                $item->garduInduk->nama_gardu_induk ?? '-',
+                $item->stok,
+                $item->tanggal_distribusi ? $item->tanggal_distribusi->format('d/m/Y') : '-',
+                $item->tanggal_pemeriksaan ? $item->tanggal_pemeriksaan->format('d/m/Y') : '-',
+                $item->tanggal_berakhir ? $item->tanggal_berakhir->format('d/m/Y') : '-',
+                $masaPakai ?? '-',
+                $selisih ?? '-',
+                $item->kondisi,
+                $statusNotifikasi,
+                $item->catatan ?? '-',
+            ];
+
+            $sheet->fromArray([$data], null, 'A' . $row);
+            
+            // Style berdasarkan status
+            $statusColor = match($statusNotifikasi) {
+                'Active' => 'C6EFCE',
+                'Warning' => 'FFEB9C',
+                'Expired' => 'FFC7CE',
+                default => 'FFFFFF'
+            };
+            
+            $sheet->getStyle('M' . $row)->applyFromArray([
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $statusColor]]
+            ]);
+
+            $row++;
+        }
+
+        // Border untuk semua data
+        $lastRow = $row - 1;
+        $sheet->getStyle('A6:N' . $lastRow)->applyFromArray([
+            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']]]
+        ]);
+
+        // Auto width
+        foreach (range('A', 'N') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Output
+        $filename = 'Laporan_Masa_Pakai_APD_' . Carbon::now()->format('Y-m-d_His') . '.xlsx';
+        $writer = new Xlsx($spreadsheet);
+        
+        $temp_file = tempnam(sys_get_temp_dir(), $filename);
+        $writer->save($temp_file);
+
+        return response()->download($temp_file, $filename)->deleteFileAfterSend(true);
+    }
 }

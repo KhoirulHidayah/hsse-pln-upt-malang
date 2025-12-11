@@ -16,7 +16,6 @@ use Inertia\Inertia;
 Route::redirect('/', 'dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function(){
-    // Ubah dari closure menjadi controller
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
 
@@ -24,12 +23,22 @@ Route::middleware(['auth', 'verified'])->group(function(){
     Route::resource('apd', ApdController::class);
     Route::resource('lokasi', LokasiController::class);
     Route::resource('gardu-induk', GarduIndukController::class);
+    
+    // ✅ ROUTE MONITORING APD - URUTAN PENTING!
+    // Route khusus HARUS di atas Route::resource
     Route::post('/monitoring-apd/import', [MonitoringApdController::class, 'import'])
         ->name('monitoring-apd.import');
     Route::get('/monitoring-apd/template', [MonitoringApdController::class, 'template'])
         ->name('monitoring-apd.template');
+    Route::get('/monitoring-apd/laporan', [MonitoringApdController::class, 'laporan'])
+        ->name('monitoring-apd.laporan');
+    Route::get('/monitoring-apd/laporan/export', [MonitoringApdController::class, 'exportLaporan'])
+        ->name('monitoring-apd.export-laporan');
+    
+    // Resource route HARUS di bawah
     Route::resource('monitoring-apd', MonitoringApdController::class);
-        // Notifikasi Routes
+    
+    // Notifikasi Routes
     Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
     Route::get('/notifikasi/preview', [NotifikasiController::class, 'preview'])->name('notifikasi.preview');
     Route::get('/notifikasi/{id}', [NotifikasiController::class, 'show'])->name('notifikasi.show');
@@ -41,7 +50,6 @@ Route::middleware(['auth', 'verified'])->group(function(){
     // Route baru untuk preview dan export
     Route::get('/serah-terima/{id}/preview', [SerahTerimaController::class, 'previewPdf'])
         ->name('serah-terima.preview');
-    
     Route::get('/serah-terima/{id}/pdf', [SerahTerimaController::class, 'exportPdf'])
         ->name('serah-terima.export');
 });

@@ -6,7 +6,7 @@ import { Head, Link, router, usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/16/solid";
 // Menambahkan ikon Pencil dan Trash2
-import { ClipboardCheck, FileUp, AlertTriangle, CheckCircle, XCircle, RefreshCw, Plus, Pencil, Trash2 } from "lucide-react"; 
+import { ClipboardCheck, FileUp, AlertTriangle, CheckCircle, XCircle, RefreshCw, Plus, Pencil, Trash2, FileText } from "lucide-react"; 
 
 // ========== KOMPONEN MODAL IMPORT EXCEL ==========
 const ImportExcelModal = ({ onClose, onImportSubmit }) => {
@@ -251,6 +251,15 @@ export default function Index({ auth, monitorings, lokasiList, garduList, filter
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
+                    {/* ✅ TOMBOL BARU: Link ke Laporan */}
+                    <Link 
+                        href={route("monitoring-apd.laporan")} 
+                        className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-3 py-1.5 text-sm font-medium text-white shadow-md hover:from-purple-700 hover:to-pink-700 transition-all"
+                        title="Lihat laporan masa pakai APD"
+                    >
+                        <FileText className="h-4 w-4" />
+                        <span className="hidden sm:inline">Laporan</span>
+                    </Link>
                     <button onClick={() => setShowImportModal(true)} className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-emerald-600 to-green-600 px-3 py-1.5 text-sm font-medium text-white shadow-md hover:from-emerald-700 hover:to-green-700 transition-all">
                         <FileUp className="h-4 w-4" />Import Excel
                     </button>
