@@ -218,38 +218,36 @@ class SerahTerimaController extends Controller
         }
     }
 
-public function exportPdf($id)
-{
-    $row = SerahTerima::with('details')->findOrFail($id);
-    
-    $configs = [
-        'unit_induk' => DokumenConfig::getValue('unit_induk'),
-        'unit_pelaksana' => DokumenConfig::getValue('unit_pelaksana'),
-    ];
+    public function previewPdf($id)
+    {
+        $row = SerahTerima::with('details')->findOrFail($id);
+        
+        $configs = [
+            'unit_induk' => DokumenConfig::getValue('unit_induk'),
+            'unit_pelaksana' => DokumenConfig::getValue('unit_pelaksana'),
+        ];
 
-    // Render view
-    $html = view('pdf.serah-terima', [
-        'data' => $row,
-        'configs' => $configs
-    ])->render();
+        // Render view
+        $html = view('pdf.serah-terima', [
+            'data' => $row,
+            'configs' => $configs
+        ])->render();
 
-    // Load ke PDF dengan options lengkap
-    $pdf = Pdf::loadHTML($html)
-        ->setPaper('A4', 'portrait')
-        ->setOptions([
-            'defaultFont' => 'Arial',
-            'isHtml5ParserEnabled' => true,
-            'isRemoteEnabled' => true,
-            'chroot' => public_path(),
-            'enable_php' => false,
-            'dpi' => 96,
-        ]);
+        // Load ke PDF dengan options lengkap
+        $pdf = Pdf::loadHTML($html)
+            ->setPaper('A4', 'portrait')
+            ->setOptions([
+                'defaultFont' => 'Arial',
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => true,
+                'chroot' => public_path(),
+                'enable_php' => false,
+                'dpi' => 96,
+            ]);
 
-    // Bersihkan nama file
-    $clean = preg_replace('/[^\w\d\-]/', '-', $row->no_seri);
-    $filename = "Serah-Terima-{$clean}.pdf";
-
-    return $pdf->download($filename);
-}
+        // Stream PDF untuk preview di browser (inline)
+        $clean = preg_replace('/[^\w\d\-]/', '-', $row->no_seri);
+        return $pdf->stream("Preview-Serah-Terima-{$clean}.pdf");
+    }
 
 }

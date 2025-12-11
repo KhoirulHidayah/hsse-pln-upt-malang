@@ -38,8 +38,12 @@ Route::middleware(['auth', 'verified'])->group(function(){
     
     Route::resource('serah-terima', SerahTerimaController::class);
     
+    // Route baru untuk preview dan export
+    Route::get('/serah-terima/{id}/preview', [SerahTerimaController::class, 'previewPdf'])
+        ->name('serah-terima.preview');
+    
     Route::get('/serah-terima/{id}/pdf', [SerahTerimaController::class, 'exportPdf'])
-        ->name('serah-terima.pdf');
+        ->name('serah-terima.export');
 });
 
 Route::middleware('auth')->group(function () {
