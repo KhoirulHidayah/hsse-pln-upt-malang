@@ -13,7 +13,9 @@ import {
     Building2,
     Check,
     Eye,
-    EyeOff
+    EyeOff,
+    ExternalLink,
+    ArrowRight
 } from 'lucide-react';
 
 export default function Index({ auth, notifications, statistics, filters }) {
@@ -77,6 +79,11 @@ export default function Index({ auth, notifications, statistics, filters }) {
                 router.reload({ only: ['notifications', 'statistics'] });
             }
         });
+    };
+
+    const handleViewDetail = (e, monitoringId) => {
+        e.stopPropagation();
+        router.visit(route('monitoring-apd.show', monitoringId));
     };
 
     const getBadgeClass = (color) => {
@@ -396,7 +403,7 @@ export default function Index({ auth, notifications, statistics, filters }) {
                                                             </div>
                                                         </div>
 
-                                                        {/* Footer */}
+                                                        {/* Footer with Action Button */}
                                                         <div className="flex items-center justify-between">
                                                             <span className={`text-xs font-semibold ${
                                                                 notif.badge_color === 'red' ? 'text-red-600 dark:text-red-400' :
@@ -405,9 +412,19 @@ export default function Index({ auth, notifications, statistics, filters }) {
                                                             }`}>
                                                                 • {notif.status_text}
                                                             </span>
-                                                            <p className="text-[10px] text-gray-500 dark:text-gray-500">
-                                                                {notif.created_at}
-                                                            </p>
+                                                            <div className="flex items-center gap-2">
+                                                                <p className="text-[10px] text-gray-500 dark:text-gray-500">
+                                                                    {notif.created_at}
+                                                                </p>
+                                                                <button
+                                                                    onClick={(e) => handleViewDetail(e, notif.monitoring_id)}
+                                                                    className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-cyan-600 hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 rounded transition-colors"
+                                                                    title="Lihat Detail Monitoring"
+                                                                >
+                                                                    <span>Detail</span>
+                                                                    <ArrowRight className="w-3 h-3" />
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
