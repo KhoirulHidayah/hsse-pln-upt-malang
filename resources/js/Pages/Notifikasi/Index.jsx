@@ -383,6 +383,10 @@ export default function Index({ auth, notifications, statistics, filters }) {
                                                                 <span>{notif.gardu_nama}</span>
                                                             </div>
                                                             <div className="flex items-center gap-1.5">
+                                                                <Clock className="w-3 h-3 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                                                                <span>Masa Pakai: {notif.masa_penggunaan || '-'}</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-1.5">
                                                                 <Calendar className="w-3 h-3 text-gray-400 dark:text-gray-500 flex-shrink-0" />
                                                                 <span>Expired: {new Date(notif.tanggal_berakhir).toLocaleDateString('id-ID')}</span>
                                                             </div>

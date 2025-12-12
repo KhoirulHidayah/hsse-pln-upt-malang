@@ -14,6 +14,8 @@ import {
     ChevronDown,
     ChevronRight,
     X,
+    Clock,
+    AlertTriangle,
 } from 'lucide-react';
 
 export default function AuthenticatedLayout({ header, children }) {
@@ -246,7 +248,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                         className="fixed inset-0 z-40"
                                         onClick={() => setNotificationOpen(false)}
                                     />
-                                    <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-[500px] overflow-hidden flex flex-col">
+                                    <div className="absolute right-0 mt-2 w-[420px] bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-[550px] overflow-hidden flex flex-col">
                                         {/* Header */}
                                         <div className="p-4 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-cyan-50 to-teal-50">
                                             <div>
@@ -287,23 +289,56 @@ export default function AuthenticatedLayout({ header, children }) {
                                                             <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
                                                                 notif.badge_color === 'red' ? 'bg-red-100' : 'bg-yellow-100'
                                                             }`}>
-                                                                <Bell className={`h-5 w-5 ${
-                                                                    notif.badge_color === 'red' ? 'text-red-600' : 'text-yellow-600'
-                                                                }`} />
+                                                                {notif.badge_color === 'red' ? (
+                                                                    <AlertTriangle className="h-5 w-5 text-red-600" />
+                                                                ) : (
+                                                                    <Clock className="h-5 w-5 text-yellow-600" />
+                                                                )}
                                                             </div>
                                                             <div className="flex-1 min-w-0">
-                                                                <div className="flex items-start justify-between gap-2">
-                                                                    <h4 className="text-sm font-semibold text-gray-900 truncate">
-                                                                        {notif.apd_nama}
-                                                                    </h4>
+                                                                <div className="flex items-start justify-between gap-2 mb-1">
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <h4 className="text-sm font-semibold text-gray-900 truncate">
+                                                                            {notif.apd_nama}
+                                                                        </h4>
+                                                                        {notif.apd_kode && (
+                                                                            <p className="text-xs text-gray-500">
+                                                                                Kode: {notif.apd_kode}
+                                                                            </p>
+                                                                        )}
+                                                                    </div>
                                                                     {!notif.is_read && (
                                                                         <span className="flex-shrink-0 w-2 h-2 bg-cyan-600 rounded-full"></span>
                                                                     )}
                                                                 </div>
-                                                                <p className="text-xs text-gray-600 mt-1">
-                                                                    {notif.status_text}
-                                                                </p>
-                                                                <p className="text-xs text-gray-400 mt-1">
+                                                                
+                                                                {/* Status Badge */}
+                                                                <div className="flex items-center gap-1.5 mb-1.5">
+                                                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
+                                                                        notif.badge_color === 'red' 
+                                                                            ? 'bg-red-100 text-red-700' 
+                                                                            : 'bg-yellow-100 text-yellow-700'
+                                                                    }`}>
+                                                                        • {notif.status_text}
+                                                                    </span>
+                                                                </div>
+
+                                                                {/* Additional Info */}
+                                                                {notif.masa_penggunaan && (
+                                                                    <div className="flex items-center gap-1.5 text-xs text-gray-600 mb-1">
+                                                                        <Clock className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                                                                        <span>Masa Pakai: {notif.masa_penggunaan}</span>
+                                                                    </div>
+                                                                )}
+
+                                                                {notif.standar && (
+                                                                    <div className="flex items-center gap-1.5 text-xs text-gray-600 mb-1">
+                                                                        <Shield className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                                                                        <span>SPLN: {notif.standar}</span>
+                                                                    </div>
+                                                                )}
+
+                                                                <p className="text-xs text-gray-400 mt-1.5">
                                                                     {notif.created_at}
                                                                 </p>
                                                             </div>

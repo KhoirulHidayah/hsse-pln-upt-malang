@@ -143,6 +143,7 @@ class NotifikasiController extends Controller
                     'priority'              => $priority,
                     'is_read'               => $item->is_read,
                     'standar'               => $item->apd?->standar ?? '-',
+                    'masa_penggunaan'       => $item->apd?->masa_penggunaan ?? '-',
                     'created_at'            => $item->created_at->diffForHumans(),
                 ];
             })
@@ -202,8 +203,11 @@ class NotifikasiController extends Controller
                 return [
                     'monitoring_id' => $item->monitoring_id,
                     'apd_nama' => $item->apd?->nama_apd ?? '-',
+                    'apd_kode' => $item->apd?->kode_apd ?? '-',
                     'badge_color' => $badgeColor,
                     'status_text' => $statusText,
+                    'masa_penggunaan' => $item->apd?->masa_penggunaan ?? null,
+                    'standar' => $item->apd?->standar ?? null,
                     'is_read' => $item->is_read,
                     'created_at' => $item->created_at->diffForHumans(),
                 ];

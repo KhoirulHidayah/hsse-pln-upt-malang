@@ -4,15 +4,12 @@ import TextAreaInput from "@/Components/TextAreaInput";
 import TextInput from "@/Components/TextInput";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, useForm, Link } from "@inertiajs/react";
-// MENAMBAH IKON CalendarDays UNTUK VISUALISASI TANGGAL
-import { Plus, X, Save, CalendarDays } from "lucide-react"; 
+import { Plus, X, Save, CalendarDays, Info, Clock } from "lucide-react"; 
 import { useState, useEffect } from "react";
 
-// Menghapus 'apdDetails' dari props
 export default function Create({ auth, apds, lokasiList, garduList }) {
     const { data, setData, post, errors, processing, reset } = useForm({
         apd_id: "",
-        // Menghapus apd_detail_id
         lokasi_id: "",
         gardu_induk_id: "",
         stok: "",
@@ -25,6 +22,12 @@ export default function Create({ auth, apds, lokasiList, garduList }) {
 
     // 🔹 State untuk daftar gardu induk yang difilter berdasarkan lokasi
     const [filteredGardu, setFilteredGardu] = useState([]);
+    
+    // 🔹 State untuk menyimpan APD yang dipilih
+    const [selectedApd, setSelectedApd] = useState(null);
+    
+    // 🔹 State untuk mode input tanggal berakhir (auto/manual)
+    const [autoCalculate, setAutoCalculate] = useState(true);
 
     // 🔹 Update daftar gardu induk ketika lokasi berubah
     useEffect(() => {
@@ -36,9 +39,61 @@ export default function Create({ auth, apds, lokasiList, garduList }) {
         } else {
             setFilteredGardu([]);
         }
-        // reset gardu_induk_id saat lokasi berubah
         setData("gardu_induk_id", "");
     }, [data.lokasi_id]);
+
+    // 🔹 Update selected APD ketika apd_id berubah
+    useEffect(() => {
+        if (data.apd_id) {
+            const apd = apds.find((a) => String(a.id) === String(data.apd_id));
+            setSelectedApd(apd || null);
+        } else {
+            setSelectedApd(null);
+        }
+    }, [data.apd_id]);
+
+    // 🔹 Auto calculate tanggal berakhir berdasarkan tanggal distribusi dan masa pakai
+    useEffect(() => {
+        if (autoCalculate && data.tanggal_distribusi && selectedApd?.masa_penggunaan) {
+            const tanggalBerakhir = calculateExpiredDate(
+                data.tanggal_distribusi, 
+                selectedApd.masa_penggunaan
+            );
+            setData("tanggal_berakhir", tanggalBerakhir);
+        }
+    }, [data.tanggal_distribusi, selectedApd, autoCalculate]);
+
+    // 🔹 Fungsi untuk menghitung tanggal berakhir
+    const calculateExpiredDate = (startDate, masaPenggunaan) => {
+        if (!startDate || !masaPenggunaan) return "";
+
+        const date = new Date(startDate);
+        
+        // Parse masa penggunaan (contoh: "24 bulan", "12 bulan", "6 bulan")
+        const match = masaPenggunaan.match(/(\d+)\s*(bulan|tahun|hari)/i);
+        
+        if (!match) return "";
+
+        const value = parseInt(match[1]);
+        const unit = match[2].toLowerCase();
+
+        switch (unit) {
+            case "bulan":
+                date.setMonth(date.getMonth() + value);
+                break;
+            case "tahun":
+                date.setFullYear(date.getFullYear() + value);
+                break;
+            case "hari":
+                date.setDate(date.getDate() + value);
+                break;
+            default:
+                return "";
+        }
+
+        // Format ke YYYY-MM-DD
+        return date.toISOString().split("T")[0];
+    };
 
     const onSubmit = (e) => {
         e.preventDefault();
@@ -56,7 +111,6 @@ export default function Create({ auth, apds, lokasiList, garduList }) {
         <AuthenticatedLayout
             user={auth.user}
             header={
-                // 🔄 Header Style Konsisten
                 <div className="flex items-center gap-2">
                     <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500 to-teal-600 shadow-md">
                         <Plus className="h-5 w-5 text-white" />
@@ -74,19 +128,13 @@ export default function Create({ auth, apds, lokasiList, garduList }) {
         >
             <Head title="Tambah Monitoring APD" />
 
-            {/* 📐 Layout dan Spacing Konsisten */}
             <div className="py-2">
-                {/* PERUBAHAN: Mengubah max-w-4xl ke max-w-7xl dan padding ke sm:px-2 lg:px-2 */}
                 <div className="mx-auto max-w-7xl sm:px-2 lg:px-2">
                     <div className="overflow-hidden bg-white shadow-md sm:rounded-lg dark:bg-gray-800">
-                        {/* PERUBAHAN: Mengubah p-6 menjadi p-3 */}
                         <div className="p-3 text-gray-900 dark:text-gray-100">
-                            <form
-                                onSubmit={onSubmit}
-                                // Menghilangkan p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg
-                                className="space-y-4" // Mengganti space-y-6 menjadi space-y-4
-                            >
-                                {/* Dropdown APD */}
+                            <form onSubmit={onSubmit} className="space-y-4">
+                                
+                                {/* Dropdown APD dengan Info Masa Pakai */}
                                 <div>
                                     <InputLabel htmlFor="apd_id" value="Nama APD" className={labelStyle} />
                                     <select
@@ -94,16 +142,29 @@ export default function Create({ auth, apds, lokasiList, garduList }) {
                                         name="apd_id"
                                         value={data.apd_id}
                                         onChange={(e) => setData("apd_id", e.target.value)}
-                                        className={inputStyle} // 🎨 Style konsisten
+                                        className={inputStyle}
                                     >
                                         <option value="">-- Pilih APD --</option>
                                         {apds.map((apd) => (
                                             <option key={apd.id} value={apd.id}>
-                                                {apd.nama_apd}
+                                                {apd.nama_apd} {apd.masa_penggunaan ? `(${apd.masa_penggunaan})` : ''}
                                             </option>
                                         ))}
                                     </select>
                                     <InputError message={errors.apd_id} className="mt-1" />
+                                    
+                                    {/* Info Masa Pakai APD yang Dipilih */}
+                                    {selectedApd && (
+                                        <div className="mt-2 flex items-start gap-2 p-2 bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-800 rounded-lg">
+                                            <Clock className="w-4 h-4 text-cyan-600 dark:text-cyan-400 flex-shrink-0 mt-0.5" />
+                                            <div className="text-xs text-cyan-700 dark:text-cyan-300 w-full">
+                                                <p className="font-semibold">Masa Pakai: {selectedApd.masa_penggunaan || '-'}</p>
+                                                {selectedApd.standar && (
+                                                    <p className="text-cyan-600 dark:text-cyan-400 mt-0.5">Standar: {selectedApd.standar}</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Lokasi & Gardu Induk */}
@@ -115,7 +176,7 @@ export default function Create({ auth, apds, lokasiList, garduList }) {
                                             name="lokasi_id"
                                             value={data.lokasi_id}
                                             onChange={(e) => setData("lokasi_id", e.target.value)}
-                                            className={inputStyle} // 🎨 Style konsisten
+                                            className={inputStyle}
                                         >
                                             <option value="">-- Pilih Lokasi --</option>
                                             {lokasiList.map((lok) => (
@@ -134,7 +195,7 @@ export default function Create({ auth, apds, lokasiList, garduList }) {
                                             name="gardu_induk_id"
                                             value={data.gardu_induk_id}
                                             onChange={(e) => setData("gardu_induk_id", e.target.value)}
-                                            className={inputStyle} // 🎨 Style konsisten
+                                            className={inputStyle}
                                             disabled={!data.lokasi_id}
                                         >
                                             <option value="">
@@ -161,17 +222,16 @@ export default function Create({ auth, apds, lokasiList, garduList }) {
                                         name="stok"
                                         value={data.stok}
                                         onChange={(e) => setData("stok", e.target.value)}
-                                        className={inputStyle} // 🎨 Style konsisten
+                                        className={inputStyle}
                                     />
                                     <InputError message={errors.stok} className="mt-1" />
                                 </div>
 
-                                {/* Tanggal (Tampilan Kalender Lebih Bagus) */}
+                                {/* Tanggal dengan Auto Calculate */}
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div>
                                         <InputLabel 
                                             htmlFor="tanggal_distribusi" 
-                                            // Tambahkan ikon CalendarDays di label
                                             value={<span className="flex items-center gap-1"><CalendarDays className="w-4 h-4"/> Tanggal Distribusi</span>} 
                                             className={labelStyle} 
                                         />
@@ -181,7 +241,7 @@ export default function Create({ auth, apds, lokasiList, garduList }) {
                                             name="tanggal_distribusi"
                                             value={data.tanggal_distribusi}
                                             onChange={(e) => setData("tanggal_distribusi", e.target.value)}
-                                            className={inputStyle} // 🎨 Style konsisten membuat date input lebih baik
+                                            className={inputStyle}
                                         />
                                         <InputError message={errors.tanggal_distribusi} className="mt-1" />
                                     </div>
@@ -189,7 +249,6 @@ export default function Create({ auth, apds, lokasiList, garduList }) {
                                     <div>
                                         <InputLabel 
                                             htmlFor="tanggal_pemeriksaan" 
-                                            // Tambahkan ikon CalendarDays di label
                                             value={<span className="flex items-center gap-1"><CalendarDays className="w-4 h-4"/> Tanggal Pemeriksaan</span>} 
                                             className={labelStyle} 
                                         />
@@ -199,29 +258,74 @@ export default function Create({ auth, apds, lokasiList, garduList }) {
                                             name="tanggal_pemeriksaan"
                                             value={data.tanggal_pemeriksaan}
                                             onChange={(e) => setData("tanggal_pemeriksaan", e.target.value)}
-                                            className={inputStyle} // 🎨 Style konsisten membuat date input lebih baik
+                                            className={inputStyle}
                                         />
                                         <InputError message={errors.tanggal_pemeriksaan} className="mt-1" />
                                     </div>
 
                                     <div>
-                                        <InputLabel 
-                                            htmlFor="tanggal_berakhir" 
-                                            // Tambahkan ikon CalendarDays di label
-                                            value={<span className="flex items-center gap-1"><CalendarDays className="w-4 h-4"/> Tanggal Berakhir</span>} 
-                                            className={labelStyle} 
-                                        />
+                                        <div className="flex items-center justify-between mb-1">
+                                            <InputLabel 
+                                                htmlFor="tanggal_berakhir" 
+                                                value={<span className="flex items-center gap-1"><CalendarDays className="w-4 h-4"/> Tanggal Berakhir</span>} 
+                                                className={labelStyle} 
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setAutoCalculate(!autoCalculate)}
+                                                className="text-xs text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 font-medium"
+                                            >
+                                                {autoCalculate ? '🤖 Otomatis' : '✏️ Manual'}
+                                            </button>
+                                        </div>
                                         <TextInput
                                             id="tanggal_berakhir"
                                             type="date"
                                             name="tanggal_berakhir"
                                             value={data.tanggal_berakhir}
-                                            onChange={(e) => setData("tanggal_berakhir", e.target.value)}
-                                            className={inputStyle} // 🎨 Style konsisten membuat date input lebih baik
+                                            onChange={(e) => {
+                                                setData("tanggal_berakhir", e.target.value);
+                                                setAutoCalculate(false); // Switch ke manual jika user edit
+                                            }}
+                                            className={`${inputStyle} ${autoCalculate ? 'bg-gray-100 dark:bg-gray-600' : ''}`}
+                                            disabled={autoCalculate && (!data.tanggal_distribusi || !selectedApd?.masa_penggunaan)}
                                         />
                                         <InputError message={errors.tanggal_berakhir} className="mt-1" />
+                                        
+                                        {/* Info Auto Calculate */}
+                                        {autoCalculate && (
+                                            <div className="mt-1.5 flex items-start gap-1.5 text-xs text-gray-600 dark:text-gray-400">
+                                                <Info className="w-3 h-3 flex-shrink-0 mt-0.5" />
+                                                <span>
+                                                    {!data.tanggal_distribusi 
+                                                        ? "Pilih tanggal distribusi terlebih dahulu"
+                                                        : !selectedApd?.masa_penggunaan
+                                                        ? "APD tidak memiliki data masa pakai"
+                                                        : `Dihitung otomatis: ${data.tanggal_distribusi} + ${selectedApd.masa_penggunaan}`
+                                                    }
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
+
+                                {/* Info Box untuk Auto Calculate */}
+                                {autoCalculate && data.tanggal_distribusi && selectedApd?.masa_penggunaan && data.tanggal_berakhir && (
+                                    <div className="flex items-start gap-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                                        <Info className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
+                                        <div className="text-sm text-green-700 dark:text-green-300">
+                                            <p className="font-semibold">✓ Tanggal berakhir telah dihitung otomatis</p>
+                                            <p className="text-xs mt-1">
+                                                Distribusi: {new Date(data.tanggal_distribusi).toLocaleDateString('id-ID')} + 
+                                                Masa Pakai: {selectedApd.masa_penggunaan} = 
+                                                Berakhir: {new Date(data.tanggal_berakhir).toLocaleDateString('id-ID')}
+                                            </p>
+                                            <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                                                💡 Klik "✏️ Manual" untuk mengubah tanggal secara manual
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Kondisi */}
                                 <div>
@@ -231,7 +335,7 @@ export default function Create({ auth, apds, lokasiList, garduList }) {
                                         name="kondisi"
                                         value={data.kondisi}
                                         onChange={(e) => setData("kondisi", e.target.value)}
-                                        className={inputStyle} // 🎨 Style konsisten
+                                        className={inputStyle}
                                     >
                                         <option value="">-- Pilih Kondisi --</option>
                                         <option value="Baik">Baik</option>
@@ -249,12 +353,12 @@ export default function Create({ auth, apds, lokasiList, garduList }) {
                                         name="catatan"
                                         value={data.catatan}
                                         onChange={(e) => setData("catatan", e.target.value)}
-                                        className={textareaStyle} // 🎨 Style konsisten
+                                        className={textareaStyle}
                                     />
                                     <InputError message={errors.catatan} className="mt-1" />
                                 </div>
 
-                                {/* Tombol Simpan / Batal - Style konsisten */}
+                                {/* Tombol Simpan / Batal */}
                                 <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-200 dark:border-gray-700">
                                     <Link
                                         href={route("monitoring-apd.index")}

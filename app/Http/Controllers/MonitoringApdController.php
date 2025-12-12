@@ -139,7 +139,7 @@ class MonitoringApdController extends Controller
     public function create()
     {
         return Inertia::render('MonitoringApd/Create', [
-            'apds'        => Apd::select('id', 'nama_apd', 'kode_apd', 'gambar')->get(),
+            'apds'        => Apd::select('id', 'nama_apd', 'kode_apd','masa_penggunaan', 'gambar', 'standar')->get(),
             'lokasiList'  => Lokasi::select('lokasi_id', 'nama_lokasi')->get(),
             'garduList'   => GarduInduk::select('gardu_induk_id', 'lokasi_id', 'nama_gardu_induk')->get(),
         ]);
@@ -166,8 +166,26 @@ class MonitoringApdController extends Controller
             ->findOrFail($id);
 
         return Inertia::render('MonitoringApd/Edit', [
-            'monitoring'   => $monitoring,
-            'apds'         => Apd::select('id', 'nama_apd', 'kode_apd', 'gambar')->get(),
+            'monitoring'   => [
+                'monitoring_id'         => $monitoring->monitoring_id,
+                'apd_id'                => $monitoring->apd_id,
+                'lokasi_id'             => $monitoring->lokasi_id,
+                'gardu_induk_id'        => $monitoring->gardu_induk_id,
+                'stok'                  => $monitoring->stok,
+                // ✅ Format tanggal ke YYYY-MM-DD untuk input type="date"
+                'tanggal_distribusi'    => $monitoring->tanggal_distribusi 
+                                        ? $monitoring->tanggal_distribusi->format('Y-m-d') 
+                                        : '',
+                'tanggal_pemeriksaan'   => $monitoring->tanggal_pemeriksaan 
+                                        ? $monitoring->tanggal_pemeriksaan->format('Y-m-d') 
+                                        : '',
+                'tanggal_berakhir'      => $monitoring->tanggal_berakhir 
+                                        ? $monitoring->tanggal_berakhir->format('Y-m-d') 
+                                        : '',
+                'kondisi'               => $monitoring->kondisi,
+                'catatan'               => $monitoring->catatan,
+            ],
+            'apds'         => Apd::select('id', 'nama_apd', 'kode_apd', 'gambar', 'masa_penggunaan', 'standar')->get(),
             'lokasiList'   => Lokasi::select('lokasi_id', 'nama_lokasi')->get(),
             'garduList'    => GarduInduk::select('gardu_induk_id', 'lokasi_id', 'nama_gardu_induk')->get(),
         ]);
