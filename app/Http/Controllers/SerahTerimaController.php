@@ -250,4 +250,32 @@ class SerahTerimaController extends Controller
         return $pdf->stream("Preview-Serah-Terima-{$clean}.pdf");
     }
 
+
+public function exportPdf($id)
+{
+    $row = SerahTerima::with('details')->findOrFail($id);
+
+    $configs = [
+        'unit_induk' => DokumenConfig::getValue('unit_induk'),
+        'unit_pelaksana' => DokumenConfig::getValue('unit_pelaksana'),
+    ];
+
+    $pdf = Pdf::loadView('pdf.serah-terima', [
+            'data' => $row,
+            'configs' => $configs
+        ])
+        ->setPaper('A4', 'portrait')
+        ->setOptions([
+            'defaultFont' => 'Arial',
+            'isHtml5ParserEnabled' => true,
+            'isRemoteEnabled' => true,
+            'chroot' => public_path(), // ⬅️ PENTING
+            'dpi' => 96,
+        ]);
+
+    $clean = preg_replace('/[^\w\d\-]/', '-', $row->no_seri);
+
+    return $pdf->download("Serah-Terima-{$clean}.pdf");
+}
+
 }
