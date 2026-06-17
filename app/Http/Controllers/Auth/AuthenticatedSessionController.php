@@ -14,7 +14,7 @@ use Inertia\Response;
 class AuthenticatedSessionController extends Controller
 {
     /**
-     * Display the login view.
+     * Display login page.
      */
     public function create(): Response
     {
@@ -25,7 +25,7 @@ class AuthenticatedSessionController extends Controller
     }
 
     /**
-     * Handle an incoming authentication request.
+     * Handle login.
      */
     public function store(LoginRequest $request): RedirectResponse
     {
@@ -33,11 +33,22 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        /** @var \App\Models\User|null $user */
+        $user = $request->user();
+
+        // Pemeriksa langsung ke halaman pemeriksaan APD
+        if ($user && $user->isPemeriksa()) {
+            return redirect()->route('pemeriksaan-apd.index');
+        }
+
+        // Admin / role lainnya diarahkan ke dashboard
+        return redirect()->intended(
+            route('dashboard', absolute: false)
+        );
     }
 
     /**
-     * Destroy an authenticated session.
+     * Logout user.
      */
     public function destroy(Request $request): RedirectResponse
     {

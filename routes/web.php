@@ -9,49 +9,50 @@ use App\Http\Controllers\MonitoringApdController;
 use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\SerahTerimaController;
 use App\Http\Controllers\DashboardController;
-use Illuminate\Foundation\Application;
+use App\Http\Controllers\PemeriksaanApdController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 Route::redirect('/', 'dashboard');
 
-Route::middleware(['auth', 'verified'])->group(function(){
-    Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->name('dashboard');
+Route::middleware(['auth', 'verified'])->group(function () {
 
-    Route::resource('jenis-apd', JenisApdController::class);
-    Route::resource('apd', ApdController::class);
-    Route::resource('lokasi', LokasiController::class);
-    Route::resource('gardu-induk', GarduIndukController::class);
-    
-    // ✅ ROUTE MONITORING APD - URUTAN PENTING!
-    // Route khusus HARUS di atas Route::resource
-    Route::post('/monitoring-apd/import', [MonitoringApdController::class, 'import'])
-        ->name('monitoring-apd.import');
-    Route::get('/monitoring-apd/template', [MonitoringApdController::class, 'template'])
-        ->name('monitoring-apd.template');
-    Route::get('/monitoring-apd/laporan', [MonitoringApdController::class, 'laporan'])
-        ->name('monitoring-apd.laporan');
-    Route::get('/monitoring-apd/laporan/export', [MonitoringApdController::class, 'exportLaporan'])
-        ->name('monitoring-apd.export-laporan');
-    
-    // Resource route HARUS di bawah
-    Route::resource('monitoring-apd', MonitoringApdController::class);
-    
-    // Notifikasi Routes
-    Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
-    Route::get('/notifikasi/preview', [NotifikasiController::class, 'preview'])->name('notifikasi.preview');
-    Route::get('/notifikasi/{id}', [NotifikasiController::class, 'show'])->name('notifikasi.show');
-    Route::post('/notifikasi/mark-all-read', [NotifikasiController::class, 'markAllAsRead'])->name('notifikasi.markAllAsRead');
-    Route::post('/notifikasi/{id}/mark-as-read', [NotifikasiController::class, 'markAsRead'])->name('notifikasi.markAsRead');
-    
-    Route::resource('serah-terima', SerahTerimaController::class);
-    
-    // Route baru untuk preview dan export
-    Route::get('/serah-terima/{id}/preview', [SerahTerimaController::class, 'previewPdf'])
-        ->name('serah-terima.preview');
-    Route::get('/serah-terima/{id}/pdf', [SerahTerimaController::class, 'exportPdf'])
-        ->name('serah-terima.export');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // ── Hanya admin ──
+    Route::middleware('admin.only')->group(function () {
+        Route::resource('jenis-apd', JenisApdController::class);
+        Route::resource('apd', ApdController::class);
+        Route::resource('lokasi', LokasiController::class);
+        Route::resource('gardu-induk', GarduIndukController::class);
+
+        // Monitoring APD (admin)
+        Route::get('/monitoring-apd/saw', [MonitoringApdController::class, 'saw'])->name('monitoring-apd.saw');
+        Route::post('/monitoring-apd/import', [MonitoringApdController::class, 'import'])->name('monitoring-apd.import');
+        Route::get('/monitoring-apd/template', [MonitoringApdController::class, 'template'])->name('monitoring-apd.template');
+        Route::get('/monitoring-apd/laporan', [MonitoringApdController::class, 'laporan'])->name('monitoring-apd.laporan');
+        Route::get('/monitoring-apd/laporan/export', [MonitoringApdController::class, 'exportLaporan'])->name('monitoring-apd.export-laporan');
+        Route::resource('monitoring-apd', MonitoringApdController::class);
+
+        // Notifikasi
+        Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
+        Route::get('/notifikasi/preview', [NotifikasiController::class, 'preview'])->name('notifikasi.preview');
+        Route::get('/notifikasi/{id}', [NotifikasiController::class, 'show'])->name('notifikasi.show');
+        Route::post('/notifikasi/mark-all-read', [NotifikasiController::class, 'markAllAsRead'])->name('notifikasi.markAllAsRead');
+        Route::post('/notifikasi/{id}/mark-as-read', [NotifikasiController::class, 'markAsRead'])->name('notifikasi.markAsRead');
+
+        // Serah Terima
+        Route::resource('serah-terima', SerahTerimaController::class);
+        Route::get('/serah-terima/{id}/preview', [SerahTerimaController::class, 'previewPdf'])->name('serah-terima.preview');
+        Route::get('/serah-terima/{id}/pdf', [SerahTerimaController::class, 'exportPdf'])->name('serah-terima.export');
+
+        Route::resource('user', UserController::class);
+    });
+
+    // ── Pemeriksaan APD (admin + pemeriksa) ──
+    Route::get('/pemeriksaan-apd', [PemeriksaanApdController::class, 'index'])->name('pemeriksaan-apd.index');
+    Route::get('/pemeriksaan-apd/{garduIndukId}', [PemeriksaanApdController::class, 'show'])->name('pemeriksaan-apd.show');
+    Route::patch('/pemeriksaan-apd/{monitoringId}/kondisi', [PemeriksaanApdController::class, 'updateKondisi'])->name('pemeriksaan-apd.update-kondisi');
 });
 
 Route::middleware('auth')->group(function () {
@@ -60,4 +61,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

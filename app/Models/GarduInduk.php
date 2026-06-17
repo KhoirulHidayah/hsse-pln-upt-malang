@@ -19,11 +19,21 @@ class GarduInduk extends Model
         'deskripsi',
     ];
 
-    /**
-     * Relasi: Gardu induk dimiliki oleh satu lokasi.
-     */
+    // ── Relasi ke lokasi ──
     public function lokasi()
     {
         return $this->belongsTo(Lokasi::class, 'lokasi_id', 'lokasi_id');
+    }
+
+    // ── Relasi ke user pemeriksa (1 gardu = 1 pemeriksa) ──
+    public function users()
+    {
+        return $this->hasMany(User::class, 'gardu_induk_id', 'gardu_induk_id');
+    }
+
+    // ── Relasi ke monitoring APD ──
+    public function monitoringApds()
+    {
+        return $this->hasMany(MonitoringApd::class, 'gardu_induk_id', 'gardu_induk_id');
     }
 }

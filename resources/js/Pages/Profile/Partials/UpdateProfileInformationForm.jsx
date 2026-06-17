@@ -8,19 +8,23 @@ import { Link, useForm, usePage } from '@inertiajs/react';
 export default function UpdateProfileInformation({
     mustVerifyEmail,
     status,
+    userRole, // Tangkap prop role di sini
     className = '',
 }) {
     const user = usePage().props.auth.user;
+    
+    // Deteksi role
+    const isAdmin = userRole === 'admin';
 
     const { data, setData, patch, errors, processing, recentlySuccessful } =
         useForm({
             name: user.name,
-            email: user.email,
+            email: user.email || '',
+            username: user.username || '', // Siapkan state untuk username pemeriksa
         });
 
     const submit = (e) => {
         e.preventDefault();
-
         patch(route('profile.update'));
     };
 
@@ -28,18 +32,17 @@ export default function UpdateProfileInformation({
         <section className={className}>
             <header>
                 <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-                    Profile Information
+                    Informasi Profil ({isAdmin ? 'Admin' : 'Pemeriksa'})
                 </h2>
-
                 <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                    Update your account's profile information and email address.
+                    Perbarui informasi identitas akun login Anda.
                 </p>
             </header>
 
             <form onSubmit={submit} className="mt-6 space-y-6">
+                {/* Field Nama */}
                 <div>
-                    <InputLabel htmlFor="name" value="Name" />
-
+                    <InputLabel htmlFor="name" value="Nama Lengkap" />
                     <TextInput
                         id="name"
                         className="mt-1 block w-full"
@@ -49,27 +52,47 @@ export default function UpdateProfileInformation({
                         isFocused
                         autoComplete="name"
                     />
-
                     <InputError className="mt-2" message={errors.name} />
                 </div>
 
-                <div>
-                    <InputLabel htmlFor="email" value="Email" />
+                {/* KONDISIONAL FORM BERDASARKAN ROLE */}
+                {isAdmin ? (
+                    /* JIKA ADMIN: Tampilkan Input Email */
+                    <div>
+                        <InputLabel htmlFor="email" value="Email" />
+                        <TextInput
+                            id="email"
+                            type="email"
+                            className="mt-1 block w-full"
+                            value={data.email}
+                            onChange={(e) => setData('email', e.target.value)}
+                            required
+                            autoComplete="username"
+                        />
+                        <InputError className="mt-2" message={errors.email} />
+                    </div>
+                ) : (
+                    /* JIKA PEMERIKSA: Tampilkan Input Username (Read-Only / Disabled agar aman) */
+                    <div>
+                        <InputLabel htmlFor="username" value="Username Lapangan" />
+                        <TextInput
+                            id="username"
+                            type="text"
+                            className="mt-1 block w-full bg-gray-100 cursor-not-allowed dark:bg-gray-700"
+                            value={data.username}
+                            disabled={true} // Di-disable agar user pemeriksa tidak merubah kredensial seenaknya
+                            onChange={(e) => setData('username', e.target.value)}
+                            required
+                        />
+                        <p className="mt-1 text-xs text-gray-400">
+                            Username diverifikasi oleh sistem pusat PLN dan tidak dapat diubah secara mandiri.
+                        </p>
+                        <InputError className="mt-2" message={errors.username} />
+                    </div>
+                )}
 
-                    <TextInput
-                        id="email"
-                        type="email"
-                        className="mt-1 block w-full"
-                        value={data.email}
-                        onChange={(e) => setData('email', e.target.value)}
-                        required
-                        autoComplete="username"
-                    />
-
-                    <InputError className="mt-2" message={errors.email} />
-                </div>
-
-                {mustVerifyEmail && user.email_verified_at === null && (
+                {/* Bagian Verifikasi Email Hanya untuk Admin */}
+                {isAdmin && mustVerifyEmail && user.email_verified_at === null && (
                     <div>
                         <p className="mt-2 text-sm text-gray-800 dark:text-gray-200">
                             Your email address is unverified.
@@ -82,19 +105,16 @@ export default function UpdateProfileInformation({
                                 Click here to re-send the verification email.
                             </Link>
                         </p>
-
                         {status === 'verification-link-sent' && (
                             <div className="mt-2 text-sm font-medium text-green-600 dark:text-green-400">
-                                A new verification link has been sent to your
-                                email address.
+                                A new verification link has been sent to your email address.
                             </div>
                         )}
                     </div>
                 )}
 
                 <div className="flex items-center gap-4">
-                    <PrimaryButton disabled={processing}>Save</PrimaryButton>
-
+                    <PrimaryButton disabled={processing}>Simpan</PrimaryButton>
                     <Transition
                         show={recentlySuccessful}
                         enter="transition ease-in-out"

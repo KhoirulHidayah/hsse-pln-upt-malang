@@ -16,11 +16,15 @@ import {
     X,
     Clock,
     AlertTriangle,
+    Users,
 } from 'lucide-react';
 
 export default function AuthenticatedLayout({ header, children }) {
     const user = usePage().props.auth.user;
     
+    // DETEKSI ROLE ADMIN (Bisa gunakan pengecekan ini jika ingin membatasi menu di sidebar)
+    const isAdmin = user.role === 'admin' || (typeof user.isAdmin === 'function' ? user.isAdmin() : true);
+
     const [sidebarOpen, setSidebarOpen] = useState(() => {
         const saved = localStorage.getItem('sidebarOpen');
         return saved !== null ? JSON.parse(saved) : true;
@@ -38,6 +42,11 @@ export default function AuthenticatedLayout({ header, children }) {
     
     const [transaksiOpen, setTransaksiOpen] = useState(() => {
         const saved = localStorage.getItem('transaksiOpen');
+        return saved !== null ? JSON.parse(saved) : false;
+    });
+
+    const [userOpen, setUserOpen] = useState(() => {
+        const saved = localStorage.getItem('userOpen');
         return saved !== null ? JSON.parse(saved) : false;
     });
 
@@ -61,6 +70,10 @@ export default function AuthenticatedLayout({ header, children }) {
         localStorage.setItem('transaksiOpen', JSON.stringify(transaksiOpen));
     }, [transaksiOpen]);
 
+    useEffect(() => {
+        localStorage.setItem('userOpen', JSON.stringify(userOpen));
+    }, [userOpen]);
+    
     // Fetch notifications preview
     useEffect(() => {
         fetchNotifications();
@@ -125,6 +138,7 @@ export default function AuthenticatedLayout({ header, children }) {
                             active={route().current('dashboard')}
                         />
 
+                        {/* Hanya Admin yang Bisa Melihat Master Data */}
                         <SectionDropdown
                             open={sidebarOpen}
                             title="Master Data"
@@ -188,8 +202,17 @@ export default function AuthenticatedLayout({ header, children }) {
                                 badge={unreadCount > 0 ? unreadCount : null}
                                 isSubmenu
                             />
+                            <SidebarItem
+                                open={sidebarOpen}
+                                icon={<ClipboardCheck />}
+                                text="Pemeriksaan APD"
+                                href={route('pemeriksaan-apd.index')}
+                                active={route().current('pemeriksaan-apd.*')}
+                                isSubmenu
+                            />
                         </SectionDropdown>
 
+                        
                         <SectionDropdown
                             open={sidebarOpen}
                             title="Transaksi"
@@ -202,6 +225,22 @@ export default function AuthenticatedLayout({ header, children }) {
                                 text="Serah Terima Barang"
                                 href={route('serah-terima.index')}
                                 active={route().current('serah-terima.*')}
+                                isSubmenu
+                            />
+                        </SectionDropdown>
+
+                        <SectionDropdown
+                            open={sidebarOpen}
+                            title="Manajemen User"
+                            isOpen={userOpen}
+                            toggle={() => setUserOpen(!userOpen)}
+                        >
+                            <SidebarItem
+                                open={sidebarOpen}
+                                icon={<Users />}
+                                text="Data User"
+                                href={route("user.index")}
+                                active={route().current("user.*")}
                                 isSubmenu
                             />
                         </SectionDropdown>
@@ -418,10 +457,12 @@ function SectionDropdown({ open, title, isOpen, toggle, children }) {
                 {open ? (
                     isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />
                 ) : (
-                    <div className="h-1 w-8 bg-cyan-300 rounded"></div>
+                    // Memberikan indikator titik/garis kecil saat sidebar mengecil agar tetap bisa di-klik
+                    <div className="h-2 w-2 bg-cyan-300 rounded-full animate-pulse"></div>
                 )}
             </button>
-            {isOpen && <ul className="space-y-0.5 mt-0.5 mx-0">{children}</ul>}
+            {/* Diperbaiki: Menu sub-item hanya akan dirender jika sidebar sedang terbuka lebar */}
+            {isOpen && open && <ul className="space-y-0.5 mt-0.5 mx-0">{children}</ul>}
         </li>
     );
 }

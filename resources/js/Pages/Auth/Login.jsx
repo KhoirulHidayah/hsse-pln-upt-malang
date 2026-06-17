@@ -10,7 +10,7 @@ import { Eye, EyeOff } from 'lucide-react';
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
-        email: '',
+        login: '',        // ← diganti dari 'email' ke 'login' (support username & email)
         password: '',
         remember: false,
     });
@@ -19,7 +19,6 @@ export default function Login({ status, canResetPassword }) {
 
     const submit = (e) => {
         e.preventDefault();
-
         post(route('login'), {
             onFinish: () => reset('password'),
         });
@@ -44,22 +43,25 @@ export default function Login({ status, canResetPassword }) {
             )}
 
             <form onSubmit={submit}>
-                <div className="space-y-4"> 
-                    {/* Input Email */}
+                <div className="space-y-4">
+                    {/* Input Username / Email */}
                     <div>
                         <TextInput
-                            id="email"
-                            type="email"
-                            name="email"
-                            value={data.email}
-                            // PERBAIKAN: Menghapus shadow-inner, menggunakan border dan fokus yang lebih bersih
-                            className="mt-1 block w-full rounded-lg border-gray-300 bg-white p-3 focus:border-cyan-600 focus:ring-cyan-600 placeholder:text-gray-400" 
+                            id="login"
+                            type="text"
+                            name="login"
+                            value={data.login}
+                            className="mt-1 block w-full rounded-lg border-gray-300 bg-white p-3 focus:border-cyan-600 focus:ring-cyan-600 placeholder:text-gray-400"
                             autoComplete="username"
                             isFocused={true}
-                            onChange={(e) => setData('email', e.target.value)}
-                            placeholder="Alamat Email"
+                            onChange={(e) => setData('login', e.target.value)}
+                            placeholder="Username atau Email"
                         />
-                        <InputError message={errors.email} className="mt-2" />
+                        <InputError message={errors.login} className="mt-2" />
+                        {/* Hint untuk user */}
+                        <p className="mt-1 text-xs text-gray-400">
+                            Pemeriksa gunakan username · Admin gunakan email
+                        </p>
                     </div>
 
                     {/* Input Password with Toggle */}
@@ -70,7 +72,6 @@ export default function Login({ status, canResetPassword }) {
                                 type={showPassword ? "text" : "password"}
                                 name="password"
                                 value={data.password}
-                                // PERBAIKAN: Menghapus shadow-inner, menggunakan border dan fokus yang lebih bersih
                                 className="mt-1 block w-full rounded-lg border-gray-300 bg-white p-3 pr-12 focus:border-cyan-600 focus:ring-cyan-600 placeholder:text-gray-400"
                                 autoComplete="current-password"
                                 onChange={(e) => setData('password', e.target.value)}
@@ -98,19 +99,14 @@ export default function Login({ status, canResetPassword }) {
                         <Checkbox
                             name="remember"
                             checked={data.remember}
-                            onChange={(e) =>
-                                setData('remember', e.target.checked)
-                            }
+                            onChange={(e) => setData('remember', e.target.checked)}
                         />
-                        <span className="ms-2 text-sm text-gray-600">
-                            Ingat saya
-                        </span>
+                        <span className="ms-2 text-sm text-gray-600">Ingat saya</span>
                     </label>
-                    
+
                     {canResetPassword && (
                         <Link
                             href={route('password.request')}
-                            // PERBAIKAN: Mengganti warna link hover agar konsisten
                             className="rounded-md text-sm text-cyan-600 underline hover:text-cyan-800 focus:outline-none focus:ring-2 focus:ring-cyan-600 focus:ring-offset-2"
                         >
                             Lupa kata sandi?
@@ -118,11 +114,10 @@ export default function Login({ status, canResetPassword }) {
                     )}
                 </div>
 
-                {/* Tombol LOGIN dengan gradient cyan */}
+                {/* Tombol LOGIN */}
                 <div className="mt-6">
-                    <PrimaryButton 
-                        // PERBAIKAN: Menyesuaikan gradien agar lebih gelap dan tegas (dari cyan-700 ke cyan-900)
-                        className="w-full justify-center bg-gradient-to-r from-cyan-700 to-cyan-800 p-3 text-lg font-semibold hover:from-cyan-800 hover:to-cyan-900 focus:ring-cyan-700" 
+                    <PrimaryButton
+                        className="w-full justify-center bg-gradient-to-r from-cyan-700 to-cyan-800 p-3 text-lg font-semibold hover:from-cyan-800 hover:to-cyan-900 focus:ring-cyan-700"
                         disabled={processing}
                     >
                         LOGIN

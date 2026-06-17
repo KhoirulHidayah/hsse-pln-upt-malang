@@ -21,21 +21,41 @@ class ProfileController extends Controller
         return Inertia::render('Profile/Edit', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => session('status'),
+            // Mengirimkan role ke frontend untuk pengkondisian UI
+            'userRole' => $request->user()->role ?? ($request->user()->email ? 'admin' : 'pemeriksa'),
         ]);
     }
 
     /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(Request $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        
+        // Menggunakan helper dari model User secara langsung
+        $isAdmin = $user->isAdmin(); 
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        $rules = [
+            'name' => ['required', 'string', 'max:255'],
+        ];
+
+        if ($isAdmin) {
+            $rules['email'] = ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email,' . $user->id];
+        } else {
+            $rules['username'] = ['required', 'string', 'max:255', 'unique:users,username,' . $user->id];
         }
 
-        $request->user()->save();
+        $validated = $request->validate($rules);
+        
+        // Ambil data secara spesifik agar field lain tidak ter-overwrite secara tidak sengaja
+        $user->fill($validated);
+
+        if ($isAdmin && $user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
 
         return Redirect::route('profile.edit');
     }

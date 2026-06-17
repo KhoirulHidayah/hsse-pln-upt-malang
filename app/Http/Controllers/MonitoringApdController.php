@@ -22,19 +22,67 @@ use Carbon\Carbon;
 
 class MonitoringApdController extends Controller
 {
+
+    // ============================
+    // 🔢 KONVERSI NILAI SAW
+    // ============================
+
+    private function nilaiMasaBerlaku($tanggalBerakhir)
+    {
+        if (!$tanggalBerakhir) return 1;
+
+        $today = now();
+        $diff = $today->diffInDays($tanggalBerakhir, false);
+
+        if ($diff > 90) return 3;        // Aktif
+        elseif ($diff >= 30) return 2;   // Peringatan
+        else return 1;                   // Kadaluwarsa
+    }
+
+    private function nilaiMasaPakai($tanggalDistribusi)
+    {
+        if (!$tanggalDistribusi) return 1;
+
+        $today = now();
+
+        // 🔥 umur sejak distribusi ke sekarang
+        $umur = $tanggalDistribusi->diffInDays($today);
+
+        if ($umur < 365) return 1;       // Tinggi
+        elseif ($umur < 730) return 2;   // Sedang
+        else return 3;                   // Rendah
+    }
+
+    private function nilaiKondisi($kondisi)
+    {
+        return match($kondisi) {
+            'Baik' => 3,
+            'Perlu Diganti' => 2,
+            'Rusak' => 1,
+            default => 1
+        };
+    }
+
     /**
      * 📋 Tampilkan daftar Monitoring APD
      */
     public function index(Request $request)
     {
         // 🔍 Ambil parameter filter & sorting dari React
-        $search         = $request->input('search');
-        $lokasi_id      = $request->input('lokasi_id');
-        $gardu_induk_id = $request->input('gardu_induk_id');
-        $kondisi        = $request->input('kondisi');
+        $search            = $request->input('search');
+        $lokasi_id         = $request->input('lokasi_id');
+        $gardu_induk_id    = $request->input('gardu_induk_id');
+        $kondisi           = $request->input('kondisi');
         $status_notifikasi = $request->input('status_notifikasi');
-        $sortField      = $request->input('sortField', 'tanggal_distribusi');
-        $sortDirection  = $request->input('sortDirection', 'desc');
+        // ✅ Default: nilai_saw ASC → Tidak Layak (terendah) tampil paling atas
+        $sortField         = $request->input('sortField', 'nilai_saw');
+        $sortDirection     = $request->input('sortDirection', 'asc');
+
+        // Kolom yang ada langsung di tabel DB (bisa pakai orderBy query)
+        $dbSortableFields = [
+            'apd_id', 'stok', 'tanggal_distribusi',
+            'tanggal_pemeriksaan', 'tanggal_berakhir', 'kondisi',
+        ];
 
         // 🔎 Query data dengan relasi
         $query = MonitoringApd::with(['apd', 'lokasi', 'garduInduk'])
@@ -50,7 +98,7 @@ class MonitoringApdController extends Controller
             ->when($gardu_induk_id, fn($q) => $q->where('gardu_induk_id', $gardu_induk_id))
             ->when($kondisi, fn($q) => $q->where('kondisi', $kondisi));
 
-        // ✅ PERBAIKAN: Filter status notifikasi DINAMIS
+        // ✅ Filter status notifikasi DINAMIS
         if ($status_notifikasi) {
             if ($status_notifikasi === 'Expired') {
                 $query->whereNotNull('tanggal_berakhir')
@@ -64,12 +112,17 @@ class MonitoringApdController extends Controller
             }
         }
 
-        // Sorting
-        $query->orderBy($sortField, $sortDirection);
+        // ✅ Sort di DB hanya jika field ada di tabel
+        if (in_array($sortField, $dbSortableFields)) {
+            $query->orderBy($sortField, $sortDirection);
+        }
 
-        // 🔄 Pagination + format data
-        $monitorings = $query->paginate(10)->through(function ($item) {
-            // ✅ Hitung status dinamis
+        // 🔄 Ambil semua data, hitung SAW, lalu sort collection
+        $allItems = $query->get()->map(function ($item) {
+
+            // ============================
+            // 🔔 NOTIFIKASI LAMA (TETAP)
+            // ============================
             $today = Carbon::now()->startOfDay();
             $tanggalBerakhir = $item->tanggal_berakhir 
                 ? Carbon::parse($item->tanggal_berakhir)->startOfDay() 
@@ -90,6 +143,45 @@ class MonitoringApdController extends Controller
                 }
             }
 
+            // ============================
+            // 🔥 SAW
+            // ============================
+
+            // Step 1: Konversi nilai
+            $c1 = $this->nilaiMasaBerlaku($item->tanggal_berakhir);
+            $c2 = $this->nilaiMasaPakai($item->tanggal_distribusi);
+            $c3 = $this->nilaiKondisi($item->kondisi);
+
+            // Max & Min (karena skala 1-3)
+            $maxC1 = 3;
+            $maxC3 = 3;
+            $minC2 = 1;
+
+            // Step 2: Normalisasi SAW
+            $r1 = $c1 / $maxC1;   // benefit
+            $r2 = $minC2 / $c2;   // cost
+            $r3 = $c3 / $maxC3;   // benefit
+
+            // Step 3: Bobot
+            $w1 = 0.4;
+            $w2 = 0.3;
+            $w3 = 0.3;
+
+            // Step 4: Nilai SAW
+            $nilaiSaw = ($w1 * $r1) + ($w2 * $r2) + ($w3 * $r3);
+
+            // Step 5: Klasifikasi
+            if ($nilaiSaw >= 0.75) {
+                $statusSaw = 'Layak';
+            } elseif ($nilaiSaw >= 0.5) {
+                $statusSaw = 'Perlu Pengecekan';
+            } else {
+                $statusSaw = 'Tidak Layak';
+            }
+
+            // ============================
+            // RETURN DATA
+            // ============================
             return [
                 'monitoring_id'              => $item->monitoring_id,
                 'apd_id'                     => $item->apd_id,
@@ -107,10 +199,69 @@ class MonitoringApdController extends Controller
                 'tanggal_pemeriksaan'        => optional($item->tanggal_pemeriksaan)->format('Y-m-d') ?? '-',
                 'tanggal_berakhir'           => optional($item->tanggal_berakhir)->format('Y-m-d') ?? '-',
                 'kondisi'                    => $item->kondisi,
-                'status_notifikasi_otomatis' => $statusNotifikasi, // ✅ Dinamis
+
+                // 🔔 lama
+                'status_notifikasi_otomatis' => $statusNotifikasi,
+
+                // 🔥 baru (SAW)
+                'nilai_saw'                  => round($nilaiSaw, 3),
+                'status_saw'                 => $statusSaw,
+                'saw_step' => [
+                    'c1_masa_berlaku' => $c1,
+                    'c2_masa_pakai'   => $c2,
+                    'c3_kondisi'      => $c3,
+
+                    'normalisasi' => [
+                        'r1' => round($r1, 3),
+                        'r2' => round($r2, 3),
+                        'r3' => round($r3, 3),
+                    ],
+
+                    'bobot' => [
+                        'w1' => $w1,
+                        'w2' => $w2,
+                        'w3' => $w3,
+                    ],
+                    'perhitungan' => [
+                        'c1' => round($w1 * $r1, 3),
+                        'c2' => round($w2 * $r2, 3),
+                        'c3' => round($w3 * $r3, 3),
+                    ],
+
+                    'total' => round($nilaiSaw, 3),
+                ],
                 'catatan'                    => $item->catatan,
             ];
-        })->appends($request->all());
+        });
+
+        // ✅ Sort collection untuk field yang tidak ada di DB (nilai_saw, status_saw, status_notifikasi_otomatis)
+        $collectionSortableFields = ['nilai_saw', 'status_saw', 'status_notifikasi_otomatis'];
+
+        if (in_array($sortField, $collectionSortableFields)) {
+            if ($sortDirection === 'asc') {
+                $allItems = $allItems->sortBy($sortField)->values();
+            } else {
+                $allItems = $allItems->sortByDesc($sortField)->values();
+            }
+        }
+
+        // ✅ Pagination manual setelah sort collection
+        $perPage  = 10;
+        $page     = $request->input('page', 1);
+        $total    = $allItems->count();
+
+        $pageItems = $allItems->forPage($page, $perPage)->values();
+
+        $monitorings = new \Illuminate\Pagination\LengthAwarePaginator(
+            $pageItems,
+            $total,
+            $perPage,
+            $page,
+            [
+                'path'  => $request->url(),
+                'query' => $request->query(),
+            ]
+        );
 
         // 📋 Data dropdown
         $lokasiList = Lokasi::select('lokasi_id', 'nama_lokasi')->get();
@@ -744,5 +895,126 @@ class MonitoringApdController extends Controller
         $writer->save($temp_file);
 
         return response()->download($temp_file, $filename)->deleteFileAfterSend(true);
+    }
+
+    public function saw(Request $request)
+    {
+        $lokasi_id      = $request->input('lokasi_id');
+        $gardu_induk_id = $request->input('gardu_induk_id');
+        $kondisi        = $request->input('kondisi');
+    
+        // ── Ambil semua data monitoring dengan filter ──
+        $query = MonitoringApd::with(['apd', 'lokasi', 'garduInduk'])
+            ->when($lokasi_id,      fn($q) => $q->where('lokasi_id', $lokasi_id))
+            ->when($gardu_induk_id, fn($q) => $q->where('gardu_induk_id', $gardu_induk_id))
+            ->when($kondisi,        fn($q) => $q->where('kondisi', $kondisi));
+    
+        $items = $query->get();
+    
+        // ════════════════════════════════════════════════
+        // STEP 1 – KONVERSI NILAI KRITERIA (Skala 1–3)
+        // ════════════════════════════════════════════════
+        $alternatif = [];
+    
+        foreach ($items as $item) {
+            $c1 = $this->nilaiMasaBerlaku($item->tanggal_berakhir);
+            $c2 = $this->nilaiMasaPakai($item->tanggal_distribusi);
+            $c3 = $this->nilaiKondisi($item->kondisi);
+    
+            $alternatif[] = [
+                'id'       => $item->monitoring_id,
+                'nama'     => optional($item->apd)->nama_apd ?? '-',
+                'kode'     => optional($item->apd)->kode_apd ?? '-',
+                'lokasi'   => optional($item->lokasi)->nama_lokasi ?? '-',
+                'gardu'    => optional($item->garduInduk)->nama_gardu_induk ?? '-',
+                'kondisi'  => $item->kondisi,
+                'tanggal_berakhir'    => optional($item->tanggal_berakhir)->format('Y-m-d'),
+                'tanggal_distribusi'  => optional($item->tanggal_distribusi)->format('Y-m-d'),
+                // Step 1 – nilai awal
+                'c1' => $c1,
+                'c2' => $c2,
+                'c3' => $c3,
+            ];
+        }
+    
+        // ════════════════════════════════════════════════
+        // STEP 2 – NORMALISASI
+        // C1 (Masa Berlaku) → BENEFIT  → r = x / max
+        // C2 (Masa Pakai)   → COST     → r = min / x
+        // C3 (Kondisi)      → BENEFIT  → r = x / max
+        // ════════════════════════════════════════════════
+        $maxC1 = 3;
+        $maxC3 = 3;
+        $minC2 = 1;
+    
+        foreach ($alternatif as &$alt) {
+            $alt['r1'] = round($alt['c1'] / $maxC1, 4);
+            $alt['r2'] = round($minC2 / $alt['c2'], 4);
+            $alt['r3'] = round($alt['c3'] / $maxC3, 4);
+        }
+        unset($alt);
+    
+        // ════════════════════════════════════════════════
+        // STEP 3 – PEMBOBOTAN
+        // ════════════════════════════════════════════════
+        $bobot = [
+            'w1' => 0.4,   // Masa Berlaku – paling penting
+            'w2' => 0.3,   // Masa Pakai
+            'w3' => 0.3,   // Kondisi
+        ];
+    
+        // ════════════════════════════════════════════════
+        // STEP 4 – NILAI PREFERENSI (Vi)
+        // Vi = w1*r1 + w2*r2 + w3*r3
+        // ════════════════════════════════════════════════
+        foreach ($alternatif as &$alt) {
+            $alt['v1'] = round($bobot['w1'] * $alt['r1'], 4);
+            $alt['v2'] = round($bobot['w2'] * $alt['r2'], 4);
+            $alt['v3'] = round($bobot['w3'] * $alt['r3'], 4);
+            $alt['vi'] = round($alt['v1'] + $alt['v2'] + $alt['v3'], 4);
+    
+            // Klasifikasi berdasarkan nilai preferensi
+            if ($alt['vi'] >= 0.75) {
+                $alt['status'] = 'Layak';
+            } elseif ($alt['vi'] >= 0.5) {
+                $alt['status'] = 'Perlu Pengecekan';
+            } else {
+                $alt['status'] = 'Tidak Layak';
+            }
+        }
+        unset($alt);
+    
+        // ════════════════════════════════════════════════
+        // STEP 5 – PERANGKINGAN (sort by Vi ASC)
+        // ════════════════════════════════════════════════
+        usort($alternatif, fn($a, $b) => $a['vi'] <=> $b['vi']);
+    
+        foreach ($alternatif as $idx => &$alt) {
+            $alt['ranking'] = $idx + 1;
+        }
+        unset($alt);
+    
+        // ── Statistik ringkasan ──
+        $total = count($alternatif);
+        $layak        = collect($alternatif)->where('status', 'Layak')->count();
+        $perluCek     = collect($alternatif)->where('status', 'Perlu Pengecekan')->count();
+        $tidakLayak   = collect($alternatif)->where('status', 'Tidak Layak')->count();
+        $avgVi        = $total > 0 ? round(collect($alternatif)->avg('vi'), 4) : 0;
+    
+        // ── Data dropdown filter ──
+        $lokasiList = Lokasi::select('lokasi_id', 'nama_lokasi')->get();
+        $garduList  = GarduInduk::select('gardu_induk_id', 'nama_gardu_induk', 'lokasi_id')->get();
+    
+        return Inertia::render('MonitoringApd/Saw', [
+            'alternatif' => $alternatif,
+            'bobot'      => $bobot,
+            'maxC1'      => $maxC1,
+            'maxC3'      => $maxC3,
+            'minC2'      => $minC2,
+            'stats'      => compact('total', 'layak', 'perluCek', 'tidakLayak', 'avgVi'),
+            'lokasiList' => $lokasiList,
+            'garduList'  => $garduList,
+            'filters'    => compact('lokasi_id', 'gardu_induk_id', 'kondisi'),
+        ]);
     }
 }

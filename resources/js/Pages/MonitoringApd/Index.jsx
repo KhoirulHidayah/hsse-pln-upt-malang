@@ -3,10 +3,10 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import TextInput from "@/Components/TextInput";
 import Select from "@/Components/Select";
 import { Head, Link, router, usePage } from "@inertiajs/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/16/solid";
 // Menambahkan ikon Pencil dan Trash2
-import { ClipboardCheck, FileUp, AlertTriangle, CheckCircle, XCircle, RefreshCw, Plus, Pencil, Trash2, FileText } from "lucide-react"; 
+import { ClipboardCheck, FileUp, AlertTriangle, CheckCircle, XCircle, RefreshCw, Plus, Pencil, Trash2, FileText, Calculator } from "lucide-react"; 
 
 // ========== KOMPONEN MODAL IMPORT EXCEL ==========
 const ImportExcelModal = ({ onClose, onImportSubmit }) => {
@@ -193,20 +193,32 @@ export default function Index({ auth, monitorings, lokasiList, garduList, filter
 
     const importResults = flash.import_results || null;
 
+    // Sort aktif dari filters yang dikirim controller
+    const activeSortField     = filters.sortField     || "nilai_saw";
+    const activeSortDirection = filters.sortDirection || "asc";
+
+    // Flag agar useEffect tidak jalan saat pertama render (mount)
+    const isFirstRender = useRef(true);
+
     const sortChanged = (field) => {
         router.get(route("monitoring-apd.index"), {
             search, lokasi_id: lokasiFilter, gardu_induk_id: garduFilter, kondisi: kondisiFilter,
             status_notifikasi: statusNotifikasiFilter, sortField: field,
-            sortDirection: filters.sortField === field && filters.sortDirection === "asc" ? "desc" : "asc",
+            sortDirection: activeSortField === field && activeSortDirection === "asc" ? "desc" : "asc",
         }, { preserveState: true, replace: true });
     };
 
     useEffect(() => {
+        // Skip saat mount pertama — biarkan URL/controller yang tentukan nilai awal
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
         const delayDebounce = setTimeout(() => {
             router.get(route("monitoring-apd.index"), {
                 search, lokasi_id: lokasiFilter, gardu_induk_id: garduFilter,
                 kondisi: kondisiFilter, status_notifikasi: statusNotifikasiFilter,
-                sortField: filters.sortField, sortDirection: filters.sortDirection,
+                sortField: activeSortField, sortDirection: activeSortDirection,
             }, { preserveState: true, replace: true });
         }, 300);
         return () => clearTimeout(delayDebounce);
@@ -217,8 +229,8 @@ export default function Index({ auth, monitorings, lokasiList, garduList, filter
             <div className="flex items-center gap-1">
                 <span>{label}</span>
                 <div className="flex flex-col">
-                    <ChevronUpIcon className={`w-3 h-3 ${filters.sortField === field && filters.sortDirection === "asc" ? "text-cyan-600" : ""}`} />
-                    <ChevronDownIcon className={`w-3 h-3 -mt-1 ${filters.sortField === field && filters.sortDirection === "desc" ? "text-cyan-600" : ""}`} />
+                    <ChevronUpIcon className={`w-3 h-3 ${activeSortField === field && activeSortDirection === "asc" ? "text-cyan-600" : ""}`} />
+                    <ChevronDownIcon className={`w-3 h-3 -mt-1 ${activeSortField === field && activeSortDirection === "desc" ? "text-cyan-600" : ""}`} />
                 </div>
             </div>
         </th>
@@ -238,6 +250,8 @@ export default function Index({ auth, monitorings, lokasiList, garduList, filter
         });
     };
 
+    const [selectedSaw, setSelectedSaw] = useState(null);
+
     return (
         <AuthenticatedLayout user={auth.user} header={
             <div className="flex items-center justify-between">
@@ -251,6 +265,13 @@ export default function Index({ auth, monitorings, lokasiList, garduList, filter
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
+                    <Link
+                        href={route("monitoring-apd.saw")} // Pastikan nama route di web.php adalah ini
+                        className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm"
+                    >
+                        <Calculator size={18} />
+                        Analisis SAW
+                    </Link>
                     {/* ✅ TOMBOL BARU: Link ke Laporan */}
                     <Link 
                         href={route("monitoring-apd.laporan")} 
@@ -313,12 +334,14 @@ export default function Index({ auth, monitorings, lokasiList, garduList, filter
                                                 <SortableHeader field="tanggal_berakhir" label="Berakhir" />
                                                 <SortableHeader field="kondisi" label="Kondisi" />
                                                 <SortableHeader field="status_notifikasi_otomatis" label="Status" />
+                                                <SortableHeader field="nilai_saw" label="Nilai SAW" />
+                                                <SortableHeader field="" label="Kelayakan" />
                                                 <th className="px-2 py-1.5 text-center w-20">Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                                             {monitorings.data.length > 0 ? monitorings.data.map((item, i) => (
-                                                <tr key={item.monitoring_id} className="hover:bg-cyan-50 dark:hover:bg-gray-700/50 transition-colors">
+                                                <tr key={item.monitoring_id} className={`hover:bg-cyan-50 dark:hover:bg-gray-700/50 transition-colors ${item.status_saw === "Tidak Layak" ? "bg-red-50/60 dark:bg-red-900/10" : ""}`}>
                                                     <td className="px-2 py-1.5 text-center text-sm">{(monitorings.current_page - 1) * monitorings.per_page + i + 1}</td>
                                                     <td className="px-2 py-1.5"><div className="w-12 h-12 rounded border bg-gray-50">{item.apd_gambar ? <img src={item.apd_gambar} alt="" className="w-full h-full object-cover" /> : <span className="text-xs text-gray-400">-</span>}</div></td>
                                                     <td className="px-2 py-1.5 font-semibold text-sm"><Link href={route("monitoring-apd.show", item.monitoring_id)} className="hover:text-cyan-600">{item.apd_nama}</Link><p className="text-xs text-gray-500 font-normal">({item.apd_kode || 'N/A'})</p></td>
@@ -330,7 +353,20 @@ export default function Index({ auth, monitorings, lokasiList, garduList, filter
                                                     <td className="px-2 py-1.5 text-xs">{item.tanggal_berakhir || "-"}</td>
                                                     <td className="px-2 py-1.5"><span className={`px-2 py-0.5 rounded-full text-xs font-bold ${item.kondisi === "Baik" ? "bg-green-100 text-green-700" : item.kondisi === "Perlu Diganti" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>{item.kondisi || "-"}</span></td>
                                                     <td className="px-2 py-1.5"><span className={`px-2 py-0.5 rounded text-xs font-medium ${item.status_notifikasi_otomatis === "Active" ? "bg-green-100 text-green-700" : item.status_notifikasi_otomatis === "Warning" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>{item.status_notifikasi_otomatis}</span></td>
-                                                    
+                                                    <td className="px-2 py-1.5 text-center text-sm font-semibold">
+                                                        {item.nilai_saw ?? "-"}
+                                                    </td>
+                                                    <td className="px-2 py-1.5">
+                                                        <span className={`px-2 py-0.5 rounded text-xs font-bold ${
+                                                            item.status_saw === "Layak"
+                                                                ? "bg-green-100 text-green-700"
+                                                                : item.status_saw === "Perlu Pengecekan"
+                                                                ? "bg-yellow-100 text-yellow-700"
+                                                                : "bg-red-100 text-red-700"
+                                                        }`}>
+                                                            {item.status_saw ?? "-"}
+                                                        </span>
+                                                    </td>
                                                     {/* AKSI - HORIZONTAL DENGAN IKON */}
                                                     <td className="px-2 py-1.5">
                                                         <div className="flex items-center justify-center gap-1.5">
@@ -386,6 +422,8 @@ export default function Index({ auth, monitorings, lokasiList, garduList, filter
                     </div>
                 </div>
             </div>
+
+
         </AuthenticatedLayout>
     );
 }
