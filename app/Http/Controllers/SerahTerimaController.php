@@ -218,6 +218,33 @@ class SerahTerimaController extends Controller
         }
     }
 
+    public function destroy($id)
+    {
+        DB::beginTransaction();
+
+        try {
+            $row = SerahTerima::findOrFail($id);
+
+            // Hapus detail barang terlebih dahulu
+            SerahTerimaDetail::where('serah_terima_id', $id)->delete();
+
+            // Hapus data utama serah terima
+            $row->delete();
+
+            DB::commit();
+
+            return redirect()
+                ->route('serah-terima.index')
+                ->with('success', 'Data serah terima berhasil dihapus.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()
+                ->back()
+                ->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
     public function previewPdf($id)
     {
         $row = SerahTerima::with('details')->findOrFail($id);

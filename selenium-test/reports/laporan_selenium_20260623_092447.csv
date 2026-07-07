@@ -1,0 +1,65 @@
+﻿test_id,skenario,status,durasi_detik,script
+TS01,Login Admin HSSE,BERHASIL,30.92,test_ts01_ts05_auth.py
+TS02,Login Pemeriksa Gardu Induk,BERHASIL,22.28,test_ts01_ts05_auth.py
+TS03,Login dengan password salah,BERHASIL,22.67,test_ts01_ts05_auth.py
+TS04,Login dengan field kosong,BERHASIL,16.94,test_ts01_ts05_auth.py
+TS05,Logout Pengguna,BERHASIL,25.66,test_ts01_ts05_auth.py
+TS06,Menampilkan Data Jenis APD,BERHASIL,22.68,test_ts06_ts09_jenis_apd.py
+TS07,Tambah Jenis APD,BERHASIL,36.52,test_ts06_ts09_jenis_apd.py
+TS08,Ubah Jenis APD,BERHASIL,51.11,test_ts06_ts09_jenis_apd.py
+TS09,Hapus Jenis APD,BERHASIL,30.96,test_ts06_ts09_jenis_apd.py
+TS10,Menampilkan Data Master APD,BERHASIL,23.89,test_ts10_ts14_master_apd.py
+TS11,Tambah Master APD,BERHASIL,42.93,test_ts10_ts14_master_apd.py
+TS12,Ubah Master APD,BERHASIL,51.17,test_ts10_ts14_master_apd.py
+TS14,Menampilkan Detail Master APD,BERHASIL,29.09,test_ts10_ts14_master_apd.py
+TS13,Hapus Master APD,BERHASIL,28.02,test_ts10_ts14_master_apd.py
+TS15,Menampilkan Data Lokasi,BERHASIL,29.25,test_ts15_ts18_lokasi.py
+TS16,Tambah Lokasi,BERHASIL,32.39,test_ts15_ts18_lokasi.py
+TS17,Ubah Lokasi,BERHASIL,30.67,test_ts15_ts18_lokasi.py
+TS18,Hapus Lokasi,BERHASIL,23.16,test_ts15_ts18_lokasi.py
+TS19,Menampilkan Data Gardu Induk,BERHASIL,20.36,test_ts19_ts22_gardu_induk.py
+TS20,Tambah Gardu Induk,BERHASIL,23.24,test_ts19_ts22_gardu_induk.py
+TS21,Ubah Gardu Induk,BERHASIL,34.19,test_ts19_ts22_gardu_induk.py
+TS22,Hapus Gardu Induk,BERHASIL,33.91,test_ts19_ts22_gardu_induk.py
+TS23,Menampilkan Data Monitoring APD,BERHASIL,18.07,test_ts23_ts27_monitoring_apd.py
+TS24,Tambah Monitoring APD,BERHASIL,35.79,test_ts23_ts27_monitoring_apd.py
+TS25,Ubah Monitoring APD,BERHASIL,42.15,test_ts23_ts27_monitoring_apd.py
+TS26,Hapus Monitoring APD,BERHASIL,35.08,test_ts23_ts27_monitoring_apd.py
+TS27,Filter Data Monitoring APD,BERHASIL,21.26,test_ts23_ts27_monitoring_apd.py
+TS28,Import Data Monitoring APD,BERHASIL,42.7,test_ts28_ts29_import_template_monitoring_apd.py
+TS29,Unduh Template Monitoring APD,BERHASIL,23.35,test_ts28_ts29_import_template_monitoring_apd.py
+TS30,Menampilkan Halaman Pemeriksaan APD oleh Admin,BERHASIL,19.15,test_ts30_ts35_pemeriksaan_apd.py
+TS31,Menampilkan Detail Pemeriksaan APD,BERHASIL,22.43,test_ts30_ts35_pemeriksaan_apd.py
+TS32,Menampilkan Pemeriksaan APD oleh Pemeriksa GI,BERHASIL,17.67,test_ts30_ts35_pemeriksaan_apd.py
+TS33,Filter Data Pemeriksaan APD,BERHASIL,21.85,test_ts30_ts35_pemeriksaan_apd.py
+TS34,Update Kondisi APD oleh Pemeriksa GI,BERHASIL,21.44,test_ts30_ts35_pemeriksaan_apd.py
+TS35,Update Kondisi APD oleh Admin HSSE,BERHASIL,21.75,test_ts30_ts35_pemeriksaan_apd.py
+TS36,Menampilkan Analisis Kelayakan APD,BERHASIL,24.14,test_ts36_ts43_saw.py
+TS37,Menampilkan Konversi Nilai Kriteria SAW,BERHASIL,20.28,test_ts36_ts43_saw.py
+TS38,Menampilkan Normalisasi SAW,BERHASIL,19.26,test_ts36_ts43_saw.py
+TS39,Menampilkan Pembobotan SAW,BERHASIL,25.7,test_ts36_ts43_saw.py
+TS40,Menampilkan Nilai Preferensi SAW,BERHASIL,34.27,test_ts36_ts43_saw.py
+TS41,Menampilkan Ranking Kelayakan APD,BERHASIL,20.03,test_ts36_ts43_saw.py
+TS42,Menampilkan Detail Perhitungan SAW,BERHASIL,25.82,test_ts36_ts43_saw.py
+TS43,Filter Data Analisis SAW,BERHASIL,20.62,test_ts36_ts43_saw.py
+TS44,Menampilkan Laporan Monitoring APD,BERHASIL,26.41,test_ts44_ts47_laporan.py
+TS45,Filter Laporan Monitoring APD,BERHASIL,36.82,test_ts44_ts47_laporan.py
+TS46,Cetak Laporan Monitoring APD,BERHASIL,20.02,test_ts44_ts47_laporan.py
+TS47,Export Laporan Monitoring APD,BERHASIL,43.12,test_ts44_ts47_laporan.py
+TS48,Menampilkan Notifikasi APD,BERHASIL,19.4,test_ts48_ts49_notifikasi_apd.py
+TS49,Validasi Status Notifikasi APD,BERHASIL,24.27,test_ts48_ts49_notifikasi_apd.py
+TS50,Menampilkan Data Serah Terima Barang,BERHASIL,19.8,test_ts50_ts54_serah_terima_barang.py
+TS51,Tambah Serah Terima Barang,BERHASIL,63.13,test_ts50_ts54_serah_terima_barang.py
+TS52,Ubah Serah Terima Barang,BERHASIL,39.5,test_ts50_ts54_serah_terima_barang.py
+TS53,Hapus Serah Terima Barang,BERHASIL,28.8,test_ts50_ts54_serah_terima_barang.py
+TS54,Cetak Dokumen Serah Terima Barang,BERHASIL,27.86,test_ts50_ts54_serah_terima_barang.py
+TS55,Menampilkan Data User,BERHASIL,19.51,test_ts55_ts58_user_management.py
+TS56,Tambah User,BERHASIL,30.1,test_ts55_ts58_user_management.py
+TS57,Ubah User,BERHASIL,33.37,test_ts55_ts58_user_management.py
+TS58,Hapus User,BERHASIL,29.78,test_ts55_ts58_user_management.py
+TS59,Menampilkan Halaman Profil Admin HSSE,BERHASIL,20.34,test_ts59_ts64_profile.py
+TS60,Ubah Username Admin HSSE,BERHASIL,21.98,test_ts59_ts64_profile.py
+TS61,Ubah Password Admin HSSE,BERHASIL,23.1,test_ts59_ts64_profile.py
+TS62,Menampilkan Halaman Profil Pemeriksa GI,BERHASIL,17.15,test_ts59_ts64_profile.py
+TS63,Ubah Username Pemeriksa GI,BERHASIL,21.14,test_ts59_ts64_profile.py
+TS64,Ubah Password Pemeriksa GI,BERHASIL,23.35,test_ts59_ts64_profile.py

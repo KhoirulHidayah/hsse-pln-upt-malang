@@ -487,7 +487,7 @@ export default function Saw({ auth, alternatif, bobot, stats, lokasiList, garduL
                             {[
                                 { label: "w₁ – Masa Berlaku", nilai: bobotLokal.w1, persen: `${bobotLokal.w1 * 100}%`, type: "Benefit" },
                                 { label: "w₂ – Masa Pakai",   nilai: bobotLokal.w2, persen: `${bobotLokal.w2 * 100}%`, type: "Cost" },
-                                { label: "w₃ – Kondisi",      nilai: bobotLokal.w3, persen: `${bobotLokal.w3 * 100}%`, type: "Benefit" },
+                                { label: "w₃ – Kondisi Fisik",      nilai: bobotLokal.w3, persen: `${bobotLokal.w3 * 100}%`, type: "Benefit" },
                             ].map((b, i) => (
                                 <div key={i} className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-800 text-center">
                                     <p className="text-xs text-amber-700 dark:text-amber-300 font-medium">{b.label}</p>

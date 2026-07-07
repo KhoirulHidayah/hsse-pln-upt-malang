@@ -163,9 +163,9 @@ class MonitoringApdController extends Controller
             $r3 = $c3 / $maxC3;   // benefit
 
             // Step 3: Bobot
-            $w1 = 0.4;
+            $w1 = 0.3;
             $w2 = 0.3;
-            $w3 = 0.3;
+            $w3 = 0.4;
 
             // Step 4: Nilai SAW
             $nilaiSaw = ($w1 * $r1) + ($w2 * $r2) + ($w3 * $r3);
@@ -958,9 +958,9 @@ class MonitoringApdController extends Controller
         // STEP 3 – PEMBOBOTAN
         // ════════════════════════════════════════════════
         $bobot = [
-            'w1' => 0.4,   // Masa Berlaku – paling penting
+            'w1' => 0.3,   // Masa Berlaku
             'w2' => 0.3,   // Masa Pakai
-            'w3' => 0.3,   // Kondisi
+            'w3' => 0.4,   // Kondisi fisik – paling penting
         ];
     
         // ════════════════════════════════════════════════
